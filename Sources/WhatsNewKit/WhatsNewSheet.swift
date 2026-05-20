@@ -27,7 +27,7 @@ public struct WhatsNewSheet: View {
                 .safeAreaInset(edge: .bottom, content: {
                     footer
                 })
-                .navigationTitle("Novidades")
+                .navigationTitle(WhatsNewLocalized.navigationTitle)
                 #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbarBackground(.hidden, for: .navigationBar)
@@ -39,7 +39,7 @@ public struct WhatsNewSheet: View {
                         } label: {
                             Image(systemName: "xmark")
                         }
-                        .accessibilityLabel("Fechar")
+                        .accessibilityLabel(WhatsNewLocalized.closeAccessibilityLabel)
                     }
                 }
         }
@@ -96,7 +96,7 @@ public struct WhatsNewSheet: View {
             Button {
                 advance()
             } label: {
-                Text(isLastPage ? "Concluir" : "Continuar")
+                Text(isLastPage ? WhatsNewLocalized.finishButtonTitle : WhatsNewLocalized.continueButtonTitle)
                     .font(.headline)
                     .frame(maxWidth: .infinity)
             }
@@ -106,6 +106,12 @@ public struct WhatsNewSheet: View {
         .safeAreaPadding(.horizontal, 24)
         .safeAreaPadding(.top, 16)
         .safeAreaPadding(.bottom, 16)
+        .frame(maxWidth: .infinity)
+        .background {
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea(edges: .bottom)
+        }
     }
 
     private var isLastPage: Bool {
@@ -147,7 +153,7 @@ private struct WhatsNewReleasePage: View {
                         .font(.largeTitle.bold())
                         .multilineTextAlignment(.center)
 
-                    Text("Versão \(release.version)")
+                    Text(WhatsNewLocalized.versionTitle(release.version))
                         .font(.subheadline)
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)
@@ -296,7 +302,72 @@ private struct StepIndicator: View {
                     .animation(.snappy, value: currentIndex)
             }
         }
-        .accessibilityLabel("Etapa \(currentIndex + 1) de \(count)")
+        .accessibilityLabel(WhatsNewLocalized.stepIndicatorAccessibilityLabel(
+            current: currentIndex + 1,
+            count: count
+        ))
+    }
+}
+
+private enum WhatsNewLocalized {
+    static let navigationTitle = string(
+        key: "whatsnew.navigation.title",
+        value: "What's New",
+        comment: "Navigation title for the WhatsNew sheet."
+    )
+
+    static let closeAccessibilityLabel = string(
+        key: "whatsnew.close.accessibility_label",
+        value: "Close",
+        comment: "Accessibility label for the close button."
+    )
+
+    static let continueButtonTitle = string(
+        key: "whatsnew.continue_button.title",
+        value: "Continue",
+        comment: "Button title used to advance to the next release page."
+    )
+
+    static let finishButtonTitle = string(
+        key: "whatsnew.finish_button.title",
+        value: "Done",
+        comment: "Button title used to finish and dismiss the WhatsNew sheet."
+    )
+
+    static func versionTitle(_ version: String) -> String {
+        String(
+            format: string(
+                key: "whatsnew.version.title",
+                value: "Version %@",
+                comment: "Version label. The placeholder is the app release version."
+            ),
+            version
+        )
+    }
+
+    static func stepIndicatorAccessibilityLabel(current: Int, count: Int) -> String {
+        String(
+            format: string(
+                key: "whatsnew.step_indicator.accessibility_label",
+                value: "Step %d of %d",
+                comment: "Accessibility label for the page step indicator. The placeholders are the current step and total step count."
+            ),
+            current,
+            count
+        )
+    }
+
+    private static func string(
+        key: String,
+        value: String,
+        comment: String
+    ) -> String {
+        NSLocalizedString(
+            key,
+            bundle: .module,
+            value: value,
+            comment: comment
+        )
     }
 }
 

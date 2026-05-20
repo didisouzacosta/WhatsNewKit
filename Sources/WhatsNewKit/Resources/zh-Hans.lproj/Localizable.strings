@@ -1,0 +1,6 @@
+"whatsnew.navigation.title" = "新功能";
+"whatsnew.close.accessibility_label" = "关闭";
+"whatsnew.continue_button.title" = "继续";
+"whatsnew.finish_button.title" = "完成";
+"whatsnew.version.title" = "版本 %@";
+"whatsnew.step_indicator.accessibility_label" = "第 %d 步，共 %d 步";

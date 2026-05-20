@@ -1,0 +1,6 @@
+"whatsnew.navigation.title" = "Neue Funktionen";
+"whatsnew.close.accessibility_label" = "Schließen";
+"whatsnew.continue_button.title" = "Weiter";
+"whatsnew.finish_button.title" = "Fertig";
+"whatsnew.version.title" = "Version %@";
+"whatsnew.step_indicator.accessibility_label" = "Schritt %d von %d";

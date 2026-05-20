@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "WhatsNewKit",
+    defaultLocalization: "en",
     platforms: [
         .iOS("18.6"),
         .macOS(.v14)
@@ -22,6 +23,9 @@ let package = Package(
             name: "WhatsNewKit",
             dependencies: [
                 .product(name: "Kingfisher", package: "Kingfisher")
+            ],
+            resources: [
+                .process("Resources")
             ]
         ),
         .testTarget(

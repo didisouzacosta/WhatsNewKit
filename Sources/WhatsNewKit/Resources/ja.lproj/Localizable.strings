@@ -1,0 +1,6 @@
+"whatsnew.navigation.title" = "新機能";
+"whatsnew.close.accessibility_label" = "閉じる";
+"whatsnew.continue_button.title" = "続ける";
+"whatsnew.finish_button.title" = "完了";
+"whatsnew.version.title" = "バージョン %@";
+"whatsnew.step_indicator.accessibility_label" = "%d/%d ステップ";

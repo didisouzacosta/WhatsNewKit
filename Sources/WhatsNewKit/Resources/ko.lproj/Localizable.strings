@@ -1,0 +1,6 @@
+"whatsnew.navigation.title" = "새로운 기능";
+"whatsnew.close.accessibility_label" = "닫기";
+"whatsnew.continue_button.title" = "계속";
+"whatsnew.finish_button.title" = "완료";
+"whatsnew.version.title" = "버전 %@";
+"whatsnew.step_indicator.accessibility_label" = "%d/%d 단계";
