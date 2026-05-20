@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="WhatsNewKit app icon" src="Docs/Images/app-icon.png" width="160">
+</p>
+
 # WhatsNewKit
 
 <p align="center">
