@@ -106,6 +106,10 @@ public struct WhatsNewPresentation: Identifiable, Equatable, Sendable {
         releases.map(\.version).joined(separator: "|")
     }
 
+    var showsStepIndicator: Bool {
+        releases.count > 1
+    }
+
     public init(releases: [WhatsNewRelease]) {
         self.releases = releases
     }

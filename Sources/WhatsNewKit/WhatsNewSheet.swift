@@ -106,10 +106,12 @@ public struct WhatsNewSheet: View {
 
     private var footer: some View {
         VStack(spacing: 16) {
-            StepIndicator(
-                currentIndex: selectedIndex,
-                count: presentation.releases.count
-            )
+            if presentation.showsStepIndicator {
+                StepIndicator(
+                    currentIndex: selectedIndex,
+                    count: presentation.releases.count
+                )
+            }
 
             Button {
                 advance()
