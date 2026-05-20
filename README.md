@@ -18,7 +18,7 @@
 
 `WhatsNewKit` helps SwiftUI apps present polished "What's New" sheets after an update. Declare the releases your app knows about, attach a view modifier, and the package decides which versions should be shown.
 
-The first launch is treated as a baseline, so new users are not interrupted. Returning users see every release newer than the last presented version and up to the current app version.
+The first launch never presents automatically, so new users are not interrupted. Returning users see every release newer than the last presented version and up to the current app version.
 
 <p align="center">
   <img alt="WhatsNewKit overview release page" src="Docs/Images/whats-new-overview.png" width="260">
@@ -98,6 +98,20 @@ struct HomeView: View {
 ```
 
 If the last presented version was `2.0.0` and the current app version is `3.0.0`, the sheet presents releases after `2.0.0` through `3.0.0`, ordered by version.
+
+### Onboarding Baseline
+
+If your app shows onboarding to new users, call `WhatsNewPresentationState.markCurrentVersionAsBaseline()` when that onboarding finishes. This records the current app version as already considered without opening a sheet or emitting analytics events.
+
+```swift
+import WhatsNewKit
+
+func onboardingDidFinish() {
+    WhatsNewPresentationState.markCurrentVersionAsBaseline()
+}
+```
+
+Only call this for users who completed onboarding in the current app version. Existing users without a stored WhatsNewKit baseline should remain eligible for any pending automatic release notes.
 
 ### Manual Presentation
 

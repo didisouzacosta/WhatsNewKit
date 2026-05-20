@@ -55,6 +55,14 @@ enum WhatsNewPresentationPolicy {
         storage.lastPresentedVersion = latestVersion
     }
 
+    static func markCurrentVersionAsBaseline(
+        currentVersion: String,
+        storage: WhatsNewStorage
+    ) {
+        storage.hasCompletedFirstLaunch = true
+        storage.lastPresentedVersion = currentVersion
+    }
+
     private static func pendingReleases(
         currentVersion: String,
         releases: [WhatsNewRelease],
