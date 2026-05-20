@@ -3,7 +3,6 @@ import Kingfisher
 import SwiftUI
 
 private let defaultMediaAspectRatio: CGFloat = 16 / 9
-private let mediaAspectRatioAnimation = Animation.smooth(duration: 0.35)
 
 public struct WhatsNewSheet: View {
     private let presentation: WhatsNewPresentation
@@ -177,8 +176,6 @@ private struct WhatsNewReleasePage: View {
 private struct WhatsNewMediaView: View {
     let media: WhatsNewMedia
 
-    @State private var imageAspectRatio = defaultMediaAspectRatio
-
     var body: some View {
         Group {
             switch media.kind {
@@ -189,21 +186,8 @@ private struct WhatsNewMediaView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .aspectRatio(currentAspectRatio, contentMode: .fit)
+        .aspectRatio(defaultMediaAspectRatio, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .animation(mediaAspectRatioAnimation, value: currentAspectRatio)
-        .onChange(of: media.url) { _, _ in
-            imageAspectRatio = defaultMediaAspectRatio
-        }
-    }
-
-    private var currentAspectRatio: CGFloat {
-        switch media.kind {
-        case .image:
-            imageAspectRatio
-        case .video:
-            defaultMediaAspectRatio
-        }
     }
 
     @ViewBuilder
@@ -217,23 +201,10 @@ private struct WhatsNewMediaView: View {
                 placeholder(systemName: "photo")
             }
             .retry(maxCount: 2, interval: .seconds(1))
-            .onSuccess { result in
-                updateImageAspectRatio(from: result.image.size)
-            }
             .fade(duration: 0.2)
             .cancelOnDisappear(true)
             .resizable()
             .scaledToFill()
-    }
-
-    private func updateImageAspectRatio(from size: CGSize) {
-        guard size.width > 0, size.height > 0 else {
-            return
-        }
-
-        withAnimation(mediaAspectRatioAnimation) {
-            imageAspectRatio = size.width / size.height
-        }
     }
 
     private func placeholder(systemName: String) -> some View {

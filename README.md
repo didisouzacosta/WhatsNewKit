@@ -69,7 +69,7 @@ struct HomeView: View {
             version: "3.0.0",
             title: "Nova experiencia de busca",
             media: WhatsNewMedia(
-                url: URL(string: "https://example.com/search.png")!,
+                url: URL(string: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80")!,
                 kind: .image
             ),
             topics: [

@@ -63,7 +63,7 @@ enum DemoReleaseCatalog {
             version: "2.0.0",
             title: "New activity center",
             media: WhatsNewMedia(
-                url: URL(string: "https://picsum.photos/seed/whatsnew-activity/1200/675")!,
+                url: URL(string: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80")!,
                 kind: .image
             ),
             topics: [
