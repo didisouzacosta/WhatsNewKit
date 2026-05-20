@@ -13,6 +13,7 @@
   <img alt="iOS" src="https://img.shields.io/badge/iOS-18.6%2B-000000?style=flat-square">
   <img alt="macOS" src="https://img.shields.io/badge/macOS-14%2B-000000?style=flat-square">
   <img alt="SPM" src="https://img.shields.io/badge/Swift_Package_Manager-compatible-brightgreen?style=flat-square">
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-blue?style=flat-square">
 </p>
 
 `WhatsNewKit` helps SwiftUI apps present polished "What's New" sheets after an update. Declare the releases your app knows about, attach a view modifier, and the package decides which versions should be shown.
@@ -225,6 +226,10 @@ Open `Demo/WhatsNewKitDemo.xcodeproj` to run a sample app that imports this pack
 
 This package is inspired by [SvenTiigi/WhatsNewKit](https://github.com/SvenTiigi/WhatsNewKit), a mature Swift package for showcasing new app features. This implementation keeps the public surface small and focuses on a SwiftUI-first release notes flow for this project.
 
+## License
+
+`WhatsNewKit` is available under the MIT license. See [LICENSE](LICENSE) for details.
+
 ---
 
 <p align="center">
@@ -241,6 +246,8 @@ This package is inspired by [SvenTiigi/WhatsNewKit](https://github.com/SvenTiigi
   <a href="#release-model">Release Model</a>
   ·
   <a href="#demo-app">Demo App</a>
+  ·
+  <a href="#license">License</a>
   ·
   <a href="https://github.com/SvenTiigi/WhatsNewKit">Original Inspiration</a>
 </p>
