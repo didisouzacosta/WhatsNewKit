@@ -3,12 +3,14 @@ import SwiftUI
 public extension View {
     func whatsNewSheet(
         releases: [WhatsNewRelease],
-        currentVersion: String = WhatsNewAppVersion.current
+        currentVersion: String = WhatsNewAppVersion.current,
+        onEvent: @escaping (WhatsNewAnalyticsEvent) -> Void = { _ in }
     ) -> some View {
         modifier(
             WhatsNewAutoPresentationModifier(
                 releases: releases,
-                currentVersion: currentVersion
+                currentVersion: currentVersion,
+                onEvent: onEvent
             )
         )
     }
@@ -16,13 +18,15 @@ public extension View {
     func whatsNewSheet(
         isTriggered: Binding<Bool>,
         releases: [WhatsNewRelease],
-        currentVersion: String = WhatsNewAppVersion.current
+        currentVersion: String = WhatsNewAppVersion.current,
+        onEvent: @escaping (WhatsNewAnalyticsEvent) -> Void = { _ in }
     ) -> some View {
         modifier(
             WhatsNewTriggeredPresentationModifier(
                 isTriggered: isTriggered,
                 releases: releases,
-                currentVersion: currentVersion
+                currentVersion: currentVersion,
+                onEvent: onEvent
             )
         )
     }
@@ -31,6 +35,7 @@ public extension View {
 private struct WhatsNewAutoPresentationModifier: ViewModifier {
     let releases: [WhatsNewRelease]
     let currentVersion: String
+    let onEvent: (WhatsNewAnalyticsEvent) -> Void
 
     private let storage = UserDefaultsWhatsNewStorage()
 
@@ -53,7 +58,10 @@ private struct WhatsNewAutoPresentationModifier: ViewModifier {
                 )
             }
             .sheet(item: $activePresentation) { presentation in
-                WhatsNewSheet(presentation: presentation) {
+                WhatsNewSheet(
+                    presentation: presentation,
+                    onEvent: onEvent
+                ) {
                     WhatsNewPresentationPolicy.register(presentation, storage: storage)
                     activePresentation = nil
                 }
@@ -66,6 +74,7 @@ private struct WhatsNewTriggeredPresentationModifier: ViewModifier {
 
     let releases: [WhatsNewRelease]
     let currentVersion: String
+    let onEvent: (WhatsNewAnalyticsEvent) -> Void
 
     private let storage = UserDefaultsWhatsNewStorage()
 
@@ -87,7 +96,10 @@ private struct WhatsNewTriggeredPresentationModifier: ViewModifier {
                 isTriggered = false
             }
             .sheet(item: $activePresentation) { presentation in
-                WhatsNewSheet(presentation: presentation) {
+                WhatsNewSheet(
+                    presentation: presentation,
+                    onEvent: onEvent
+                ) {
                     WhatsNewPresentationPolicy.register(presentation, storage: storage)
                     activePresentation = nil
                 }

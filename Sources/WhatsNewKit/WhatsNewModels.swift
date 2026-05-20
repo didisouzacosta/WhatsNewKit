@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#endif
 
 public struct WhatsNewRelease: Identifiable, Equatable, Sendable {
     public let version: String
@@ -56,18 +59,43 @@ public enum WhatsNewTopicIcon: Equatable, @unchecked Sendable {
     }
 }
 
-public struct WhatsNewMedia: Equatable, Sendable {
-    public let url: URL
-    public let kind: Kind
+public enum WhatsNewMedia: Equatable, @unchecked Sendable {
+    case image(ImageSource)
+    case video(URL)
 
-    public init(url: URL, kind: Kind) {
-        self.url = url
-        self.kind = kind
+    public static func image(_ url: URL) -> WhatsNewMedia {
+        .image(.url(url))
     }
 
-    public enum Kind: Equatable, Sendable {
-        case image
-        case video
+    public enum ImageSource: Equatable, @unchecked Sendable {
+        case asset(String, bundle: Bundle? = nil)
+        case url(URL)
+        #if canImport(UIKit)
+        case uiImage(UIImage)
+        #endif
+
+        public static func == (lhs: ImageSource, rhs: ImageSource) -> Bool {
+            switch (lhs, rhs) {
+            case let (.asset(lhsName, lhsBundle), .asset(rhsName, rhsBundle)):
+                lhsName == rhsName && lhsBundle?.bundleIdentifier == rhsBundle?.bundleIdentifier
+            case let (.url(lhsURL), .url(rhsURL)):
+                lhsURL == rhsURL
+            case (.asset, .url), (.url, .asset):
+                false
+            #if canImport(UIKit)
+            case let (.uiImage(lhsImage), .uiImage(rhsImage)):
+                lhsImage === rhsImage
+            case (.asset, .uiImage), (.url, .uiImage), (.uiImage, .asset), (.uiImage, .url):
+                false
+            #endif
+            }
+        }
+    }
+}
+
+extension WhatsNewMedia.ImageSource: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = .asset(value)
     }
 }
 
@@ -80,6 +108,43 @@ public struct WhatsNewPresentation: Identifiable, Equatable, Sendable {
 
     public init(releases: [WhatsNewRelease]) {
         self.releases = releases
+    }
+}
+
+public enum WhatsNewAnalyticsEvent: Equatable, Sendable {
+    case opened(WhatsNewPresentation)
+    case closed(WhatsNewPresentation)
+    case stepProgress(release: WhatsNewRelease, index: Int, count: Int)
+
+    public var presentation: WhatsNewPresentation? {
+        switch self {
+        case let .opened(presentation), let .closed(presentation):
+            presentation
+        case .stepProgress:
+            nil
+        }
+    }
+
+    public var zeroBasedStepIndex: Int? {
+        switch self {
+        case let .stepProgress(_, index, _):
+            index
+        case .opened, .closed:
+            nil
+        }
+    }
+
+    public var oneBasedStepIndex: Int? {
+        zeroBasedStepIndex.map { $0 + 1 }
+    }
+
+    public var totalStepCount: Int? {
+        switch self {
+        case let .stepProgress(_, _, count):
+            count
+        case .opened, .closed:
+            nil
+        }
     }
 }
 

@@ -32,11 +32,26 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("WhatsNewKit Demo")
-            .whatsNewSheet(releases: releases)
+            .whatsNewSheet(
+                releases: releases,
+                onEvent: trackWhatsNewEvent
+            )
             .whatsNewSheet(
                 isTriggered: $showWhatsNew,
-                releases: releases
+                releases: releases,
+                onEvent: trackWhatsNewEvent
             )
+        }
+    }
+
+    private func trackWhatsNewEvent(_ event: WhatsNewAnalyticsEvent) {
+        switch event {
+        case let .opened(presentation):
+            print("WhatsNew opened: \(presentation.id)")
+        case let .closed(presentation):
+            print("WhatsNew closed: \(presentation.id)")
+        case let .stepProgress(release, index, count):
+            print("WhatsNew step: \(index + 1)/\(count) - \(release.version)")
         }
     }
 }
@@ -62,10 +77,7 @@ enum DemoReleaseCatalog {
         WhatsNewRelease(
             version: "2.0.0",
             title: "New activity center",
-            media: WhatsNewMedia(
-                url: URL(string: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80")!,
-                kind: .image
-            ),
+            media: .image(URL(string: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80")!),
             topics: [
                 WhatsNewTopic(
                     title: "Unified history",
@@ -82,10 +94,7 @@ enum DemoReleaseCatalog {
         WhatsNewRelease(
             version: "2.5.1",
             title: "Fixes and media in the sheet",
-            media: WhatsNewMedia(
-                url: URL(string: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4")!,
-                kind: .video
-            ),
+            media: .video(URL(string: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4")!),
             topics: [
                 WhatsNewTopic(
                     title: "Video support",

@@ -1,4 +1,5 @@
 import AVKit
+import Combine
 import Kingfisher
 import SwiftUI
 
@@ -6,17 +7,22 @@ private let defaultMediaAspectRatio: CGFloat = 16 / 9
 
 public struct WhatsNewSheet: View {
     private let presentation: WhatsNewPresentation
+    private let onEvent: (WhatsNewAnalyticsEvent) -> Void
     private let onFinish: () -> Void
 
     @State private var selectedIndex = 0
     @State private var scrollPosition: Int? = 0
+    @State private var hasEmittedOpen = false
+    @State private var hasEmittedClose = false
     @Environment(\.dismiss) private var dismiss
 
     public init(
         presentation: WhatsNewPresentation,
+        onEvent: @escaping (WhatsNewAnalyticsEvent) -> Void = { _ in },
         onFinish: @escaping () -> Void
     ) {
         self.presentation = presentation
+        self.onEvent = onEvent
         self.onFinish = onFinish
     }
 
@@ -42,6 +48,12 @@ public struct WhatsNewSheet: View {
                     }
                 }
         }
+        .onAppear {
+            emitOpenIfNeeded()
+        }
+        .onDisappear {
+            emitCloseIfNeeded()
+        }
     }
 
     @ViewBuilder
@@ -65,10 +77,14 @@ public struct WhatsNewSheet: View {
         }
         .onChange(of: selectedIndex) { _, newValue in
             scrollPosition = newValue
+            emitStepProgress(for: newValue)
         }
         #else
         TabView(selection: $selectedIndex) {
             releasePages
+        }
+        .onChange(of: selectedIndex) { _, newValue in
+            emitStepProgress(for: newValue)
         }
         #endif
     }
@@ -76,7 +92,10 @@ public struct WhatsNewSheet: View {
     @ViewBuilder
     private var releasePages: some View {
         ForEach(Array(presentation.releases.enumerated()), id: \.element.id) { index, release in
-            WhatsNewReleasePage(release: release)
+            WhatsNewReleasePage(
+                release: release,
+                isActive: selectedIndex == index
+            )
                 #if os(iOS)
                 .containerRelativeFrame(.horizontal)
                 .id(index)
@@ -135,16 +154,51 @@ public struct WhatsNewSheet: View {
         onFinish()
         dismiss()
     }
+
+    private func emitOpenIfNeeded() {
+        guard hasEmittedOpen == false else {
+            return
+        }
+
+        hasEmittedOpen = true
+        onEvent(.opened(presentation))
+        emitStepProgress(for: selectedIndex)
+    }
+
+    private func emitCloseIfNeeded() {
+        guard hasEmittedClose == false else {
+            return
+        }
+
+        hasEmittedClose = true
+        onEvent(.closed(presentation))
+    }
+
+    private func emitStepProgress(for index: Int) {
+        guard presentation.releases.indices.contains(index) else {
+            return
+        }
+
+        onEvent(.stepProgress(
+            release: presentation.releases[index],
+            index: index,
+            count: presentation.releases.count
+        ))
+    }
 }
 
 private struct WhatsNewReleasePage: View {
     let release: WhatsNewRelease
+    let isActive: Bool
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 if let media = release.media {
-                    WhatsNewMediaView(media: media)
+                    WhatsNewMediaView(
+                        media: media,
+                        isActive: isActive
+                    )
                 }
 
                 VStack(alignment: .center, spacing: 8) {
@@ -175,39 +229,130 @@ private struct WhatsNewReleasePage: View {
 
 private struct WhatsNewMediaView: View {
     let media: WhatsNewMedia
+    let isActive: Bool
 
     var body: some View {
-        Group {
-            switch media.kind {
-            case .image:
-                imageView
-            case .video:
-                VideoPlayer(player: AVPlayer(url: media.url))
+        Color.clear
+            .aspectRatio(defaultMediaAspectRatio, contentMode: .fit)
+            .overlay {
+                mediaContent
             }
-        }
         .frame(maxWidth: .infinity)
-        .aspectRatio(defaultMediaAspectRatio, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     @ViewBuilder
-    private var imageView: some View {
-        kingfisherImage
+    private var mediaContent: some View {
+        switch media {
+        case let .image(source):
+            imageView(source)
+        case let .video(url):
+            WhatsNewVideoView(
+                url: url,
+                isActive: isActive
+            )
+        }
     }
 
-    private var kingfisherImage: some View {
-        KFImage(media.url)
+    @ViewBuilder
+    private func imageView(_ source: WhatsNewMedia.ImageSource) -> some View {
+        switch source {
+        case let .asset(name, bundle):
+            Image(name, bundle: bundle)
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
+        case let .url(url):
+            remoteImageView(url)
+        #if canImport(UIKit)
+        case let .uiImage(image):
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
+        #endif
+        }
+    }
+
+    private func remoteImageView(_ url: URL) -> some View {
+        KFImage(url)
             .placeholder {
-                placeholder(systemName: "photo")
+                WhatsNewMediaPlaceholder(systemName: "photo")
             }
             .retry(maxCount: 2, interval: .seconds(1))
             .fade(duration: 0.2)
             .cancelOnDisappear(true)
             .resizable()
             .scaledToFill()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
+    }
+}
+
+private struct WhatsNewVideoView: View {
+    private let url: URL
+    private let isActive: Bool
+
+    @State private var item: AVPlayerItem
+    @State private var player: AVPlayer
+    @State private var isReadyToPlay = false
+
+    init(url: URL, isActive: Bool) {
+        let item = AVPlayerItem(url: url)
+
+        self.url = url
+        self.isActive = isActive
+        _item = State(initialValue: item)
+        _player = State(initialValue: AVPlayer(playerItem: item))
     }
 
-    private func placeholder(systemName: String) -> some View {
+    var body: some View {
+        ZStack {
+            WhatsNewMediaPlaceholder(systemName: "play.rectangle.fill")
+
+            VideoPlayer(player: player)
+                .opacity(isReadyToPlay ? 1 : 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipped()
+        .onReceive(item.publisher(for: \.status)) { status in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isReadyToPlay = status == .readyToPlay
+            }
+
+            updatePlayback()
+        }
+        .onChange(of: isActive) { _, _ in
+            updatePlayback()
+        }
+        .onChange(of: url) { _, newValue in
+            let newItem = AVPlayerItem(url: newValue)
+
+            isReadyToPlay = false
+            item = newItem
+            player.replaceCurrentItem(with: newItem)
+        }
+        .onDisappear {
+            player.pause()
+        }
+    }
+
+    private func updatePlayback() {
+        guard isReadyToPlay, isActive else {
+            player.pause()
+            return
+        }
+
+        player.play()
+    }
+}
+
+private struct WhatsNewMediaPlaceholder: View {
+    let systemName: String
+
+    var body: some View {
         ZStack {
             Rectangle()
                 .fill(.secondary.opacity(0.12))
