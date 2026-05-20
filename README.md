@@ -77,12 +77,12 @@ struct HomeView: View {
     private let releases = [
         WhatsNewRelease(
             version: "3.0.0",
-            title: "Nova experiencia de busca",
+            title: "New search experience",
             media: .image(URL(string: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80")!),
             topics: [
                 WhatsNewTopic(
-                    title: "Resultados mais rapidos",
-                    description: "A busca agora prioriza os itens mais usados.",
+                    title: "Faster results",
+                    description: "Search now prioritizes your most-used items.",
                     icon: .systemImage("magnifyingglass.circle.fill")
                 )
             ]
@@ -113,7 +113,7 @@ struct SettingsView: View {
 
     var body: some View {
         List {
-            Button("Novidades") {
+            Button("What's New") {
                 showWhatsNew = true
             }
         }
@@ -153,17 +153,17 @@ media: .video(URL(string: "https://example.com/release.mp4")!)
 ```swift
 let release = WhatsNewRelease(
     version: "2.5.1",
-    title: "Correcoes e midia no sheet",
+    title: "Fixes and media in the sheet",
     media: .video(URL(string: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4")!),
     topics: [
         WhatsNewTopic(
-            title: "Suporte a video",
-            description: "Cada versao pode apresentar uma URL de imagem ou video.",
+            title: "Video support",
+            description: "Each version can present an image or video URL.",
             icon: .systemImage("play.rectangle.fill")
         ),
         WhatsNewTopic(
-            title: "Icones customizados",
-            description: "Use SF Symbols ou imagens do bundle do app.",
+            title: "Custom icons",
+            description: "Use SF Symbols or images from the app bundle.",
             icon: .image("ReleaseIcon")
         )
     ]
