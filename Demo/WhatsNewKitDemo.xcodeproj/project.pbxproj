@@ -10,6 +10,7 @@
 		7E0601B02DDE000100000001 /* WhatsNewKitDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0601A02DDE000100000001 /* WhatsNewKitDemoApp.swift */; };
 		7E0601B12DDE000100000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0601A12DDE000100000001 /* ContentView.swift */; };
 		7E0601B22DDE000100000001 /* WhatsNewKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7E0601D02DDE000100000001 /* WhatsNewKit */; };
+		A91579682FBE359E006D5087 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = A91579672FBE359E006D5087 /* AppIcon.icon */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,6 +67,7 @@
 			buildPhases = (
 				7E0601602DDE000100000001 /* Sources */,
 				7E0601702DDE000100000001 /* Frameworks */,
+				A91579692FBE359E006D5087 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -80,6 +82,17 @@
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A91579692FBE359E006D5087 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A91579682FBE359E006D5087 /* AppIcon.icon in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXProject section */
 		7E0601102DDE000100000001 /* Project object */ = {
@@ -246,6 +259,7 @@
 		7E0602102DDE000100000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -275,6 +289,7 @@
 		7E0602112DDE000100000001 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
