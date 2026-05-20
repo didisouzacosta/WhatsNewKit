@@ -23,7 +23,6 @@ enum WhatsNewPresentationPolicy {
 
         guard storage.hasCompletedFirstLaunch else {
             storage.hasCompletedFirstLaunch = true
-            storage.lastPresentedVersion = currentVersion
             return nil
         }
 

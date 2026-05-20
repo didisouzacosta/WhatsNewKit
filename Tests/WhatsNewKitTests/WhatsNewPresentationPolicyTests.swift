@@ -3,8 +3,8 @@ import Testing
 
 @Suite("WhatsNew presentation policy")
 struct WhatsNewPresentationPolicyTests {
-    @Test("first app launch never presents the sheet and stores the current version as baseline")
-    func firstAppLaunchStoresBaselineWithoutPresenting() {
+    @Test("first app launch never presents the sheet")
+    func firstAppLaunchDoesNotPresent() {
         let storage = InMemoryWhatsNewStorage()
         let releases = [
             WhatsNewRelease(version: "1", title: "Initial", topics: [])
@@ -19,7 +19,43 @@ struct WhatsNewPresentationPolicyTests {
 
         #expect(presentation == nil)
         #expect(storage.hasCompletedFirstLaunch)
-        #expect(storage.lastPresentedVersion == "1")
+    }
+
+    @Test("first app launch does not store the current version as presented")
+    func firstAppLaunchDoesNotStoreLastPresentedVersion() {
+        let storage = InMemoryWhatsNewStorage()
+        let releases = [
+            WhatsNewRelease(version: "1.2.0", title: "Current", topics: [])
+        ]
+
+        _ = WhatsNewPresentationPolicy.presentation(
+            currentVersion: "1.2.0",
+            releases: releases,
+            storage: storage,
+            trigger: .appLaunch
+        )
+
+        #expect(storage.hasCompletedFirstLaunch)
+        #expect(storage.lastPresentedVersion == nil)
+    }
+
+    @Test("second app launch presents current release when no release has been registered")
+    func secondAppLaunchPresentsCurrentReleaseWhenNoReleaseHasBeenRegistered() throws {
+        let storage = InMemoryWhatsNewStorage()
+        storage.hasCompletedFirstLaunch = true
+        let releases = [
+            WhatsNewRelease(version: "1.2.0", title: "Current", topics: [])
+        ]
+
+        let presentation = try #require(WhatsNewPresentationPolicy.presentation(
+            currentVersion: "1.2.0",
+            releases: releases,
+            storage: storage,
+            trigger: .appLaunch
+        ))
+
+        #expect(presentation.releases.map(\.version) == ["1.2.0"])
+        #expect(storage.lastPresentedVersion == nil)
     }
 
     @Test("manual trigger presents releases even before automatic baseline exists")
