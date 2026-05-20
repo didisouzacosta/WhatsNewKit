@@ -9,22 +9,22 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Estado do demo") {
-                    LabeledContent("Versão atual", value: WhatsNewAppVersion.current)
+                Section("Demo status") {
+                    LabeledContent("Current version", value: WhatsNewAppVersion.current)
                 }
 
-                Section("Ações") {
-                    Button("Abrir Whats New manualmente") {
+                Section("Actions") {
+                    Button("Open What's New manually") {
                         showWhatsNew = true
                     }
                 }
 
-                Section("Releases configuradas") {
+                Section("Configured releases") {
                     ForEach(releases) { release in
                         VStack(alignment: .leading, spacing: 4) {
                             Text(release.title)
                                 .font(.headline)
-                            Text("Versão \(release.version)")
+                            Text("Version \(release.version)")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
@@ -45,81 +45,56 @@ enum DemoReleaseCatalog {
     static let releases = [
         WhatsNewRelease(
             version: "1.1.0",
-            title: "Melhorias de onboarding",
+            title: "What's new in the app",
             topics: [
                 WhatsNewTopic(
-                    title: "Fluxo mais curto",
-                    description: "As etapas iniciais foram reorganizadas para usuários recorrentes chegarem mais rápido ao conteúdo principal.",
-                    icon: .systemImage("arrow.forward.circle.fill")
+                    title: "Clear release highlights",
+                    description: "Important product updates are grouped into focused sections with concise titles and descriptions.",
+                    icon: .systemImage("sparkles")
                 ),
                 WhatsNewTopic(
-                    title: "Preferências preservadas",
-                    description: "A tela respeita as escolhas salvas anteriormente no app.",
-                    icon: .systemImage("checkmark.seal.fill")
-                ),
-                WhatsNewTopic(
-                    title: "Fluxo mais curto",
-                    description: "As etapas iniciais foram reorganizadas para usuários recorrentes chegarem mais rápido ao conteúdo principal.",
-                    icon: .systemImage("arrow.forward.circle.fill")
-                ),
-                WhatsNewTopic(
-                    title: "Preferências preservadas",
-                    description: "A tela respeita as escolhas salvas anteriormente no app.",
-                    icon: .systemImage("checkmark.seal.fill")
-                ),
-                WhatsNewTopic(
-                    title: "Preferências preservadas",
-                    description: "A tela respeita as escolhas salvas anteriormente no app.",
-                    icon: .systemImage("checkmark.seal.fill")
-                ),
-                WhatsNewTopic(
-                    title: "Fluxo mais curto",
-                    description: "As etapas iniciais foram reorganizadas para usuários recorrentes chegarem mais rápido ao conteúdo principal.",
-                    icon: .systemImage("arrow.forward.circle.fill")
-                ),
-                WhatsNewTopic(
-                    title: "Preferências preservadas",
-                    description: "A tela respeita as escolhas salvas anteriormente no app.",
+                    title: "Smarter presentation",
+                    description: "Returning users only see releases they have not reviewed yet, keeping the update flow relevant.",
                     icon: .systemImage("checkmark.seal.fill")
                 )
             ]
         ),
         WhatsNewRelease(
             version: "2.0.0",
-            title: "Nova central de atividades",
+            title: "New activity center",
             media: WhatsNewMedia(
                 url: URL(string: "https://picsum.photos/seed/whatsnew-activity/1200/675")!,
                 kind: .image
             ),
             topics: [
                 WhatsNewTopic(
-                    title: "Histórico unificado",
-                    description: "Eventos importantes agora aparecem em uma única lista cronológica.",
+                    title: "Unified history",
+                    description: "Important events now appear in a single chronological list.",
                     icon: .systemImage("clock.arrow.circlepath")
                 ),
                 WhatsNewTopic(
-                    title: "Filtros por contexto",
-                    description: "Use filtros rápidos para encontrar mudanças por área do produto.",
+                    title: "Context filters",
+                    description: "Use quick filters to find changes by product area.",
                     icon: .systemImage("line.3.horizontal.decrease.circle.fill")
                 )
             ]
         ),
         WhatsNewRelease(
             version: "2.5.1",
-            title: "Correções e mídia no sheet",
+            title: "Fixes and media in the sheet",
             media: WhatsNewMedia(
-                url: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")!,
+                url: URL(string: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4")!,
                 kind: .video
             ),
             topics: [
                 WhatsNewTopic(
-                    title: "Suporte a vídeo",
-                    description: "Cada versão pode apresentar uma URL de imagem ou vídeo.",
+                    title: "Video support",
+                    description: "Each version can present an image or video URL.",
                     icon: .systemImage("play.rectangle.fill")
                 ),
                 WhatsNewTopic(
-                    title: "Comparação semântica",
-                    description: "Versões como 1.1.0, 1.0.0 e 2.5.1 são ordenadas numericamente.",
+                    title: "Semantic comparison",
+                    description: "Versions like 1.1.0, 1.0.0, and 2.5.1 are ordered numerically.",
                     icon: .systemImage("number.circle.fill")
                 )
             ]

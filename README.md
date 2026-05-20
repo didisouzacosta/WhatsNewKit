@@ -129,7 +129,7 @@ let release = WhatsNewRelease(
     version: "2.5.1",
     title: "Correcoes e midia no sheet",
     media: WhatsNewMedia(
-        url: URL(string: "https://example.com/demo.mp4")!,
+        url: URL(string: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4")!,
         kind: .video
     ),
     topics: [

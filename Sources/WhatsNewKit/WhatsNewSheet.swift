@@ -159,6 +159,7 @@ private struct WhatsNewReleasePage: View {
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
+                .padding(.bottom, 4)
 
                 VStack(alignment: .leading, spacing: 18) {
                     ForEach(release.topics) { topic in
