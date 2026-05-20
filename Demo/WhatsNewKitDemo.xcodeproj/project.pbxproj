@@ -16,6 +16,7 @@
 		7E0601902DDE000100000001 /* WhatsNewKitDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WhatsNewKitDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E0601A02DDE000100000001 /* WhatsNewKitDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewKitDemoApp.swift; sourceTree = "<group>"; };
 		7E0601A12DDE000100000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A91579672FBE359E006D5087 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,6 +42,7 @@
 		7E0601302DDE000100000001 /* WhatsNewKitDemo */ = {
 			isa = PBXGroup;
 			children = (
+				A91579672FBE359E006D5087 /* AppIcon.icon */,
 				7E0601A02DDE000100000001 /* WhatsNewKitDemoApp.swift */,
 				7E0601A12DDE000100000001 /* ContentView.swift */,
 			);
