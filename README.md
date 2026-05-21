@@ -140,7 +140,7 @@ struct SettingsView: View {
 }
 ```
 
-Manual presentation uses the same version filtering, but it does not depend on the stored last-presented version. It shows releases up to the current app version.
+Manual presentation is forced. It ignores first-launch state, the stored last-presented version, and the current app version, then shows every declared release ordered by version. This makes it suitable for settings screens, debug tools, previews, and development workflows.
 
 ## Release Model
 

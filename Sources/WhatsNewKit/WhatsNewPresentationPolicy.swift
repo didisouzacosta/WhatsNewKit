@@ -8,11 +8,9 @@ enum WhatsNewPresentationPolicy {
         trigger: WhatsNewPresentationTrigger = .appLaunch
     ) -> WhatsNewPresentation? {
         if trigger == .manual {
-            let visibleReleases = pendingReleases(
-                currentVersion: currentVersion,
-                releases: releases,
-                lastPresentedVersion: nil
-            )
+            let visibleReleases = releases.sorted {
+                SemanticVersion($0.version) < SemanticVersion($1.version)
+            }
 
             guard visibleReleases.isEmpty == false else {
                 return nil

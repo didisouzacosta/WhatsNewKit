@@ -145,8 +145,8 @@ struct WhatsNewPresentationPolicyTests {
         #expect(storage.lastPresentedVersion == nil)
     }
 
-    @Test("manual trigger presents current releases even after they were already registered")
-    func manualTriggerPresentsCurrentReleasesAfterRegistration() throws {
+    @Test("manual trigger presents every release even after current releases were already registered")
+    func manualTriggerPresentsEveryReleaseAfterCurrentReleasesWereRegistered() throws {
         let storage = InMemoryWhatsNewStorage()
         storage.hasCompletedFirstLaunch = true
         storage.lastPresentedVersion = "2"
@@ -163,11 +163,29 @@ struct WhatsNewPresentationPolicyTests {
             trigger: .manual
         ))
 
+        #expect(presentation.releases.map(\.version) == ["1", "2", "3"])
+    }
+
+    @Test("manual trigger presents releases newer than the current app version")
+    func manualTriggerPresentsReleasesNewerThanCurrentAppVersion() throws {
+        let storage = InMemoryWhatsNewStorage()
+        let releases = [
+            WhatsNewRelease(version: "1", title: "Current", topics: []),
+            WhatsNewRelease(version: "2", title: "Next", topics: [])
+        ]
+
+        let presentation = try #require(WhatsNewPresentationPolicy.presentation(
+            currentVersion: "1",
+            releases: releases,
+            storage: storage,
+            trigger: .manual
+        ))
+
         #expect(presentation.releases.map(\.version) == ["1", "2"])
     }
 
-    @Test("manual trigger presents releases at or before a new user baseline")
-    func manualTriggerPresentsReleasesAtOrBeforeNewUserBaseline() throws {
+    @Test("manual trigger presents every release without changing a new user baseline")
+    func manualTriggerPresentsEveryReleaseWithoutChangingNewUserBaseline() throws {
         let storage = InMemoryWhatsNewStorage()
         let releases = [
             WhatsNewRelease(version: "1.2.0", title: "Previous", topics: []),
@@ -187,7 +205,7 @@ struct WhatsNewPresentationPolicyTests {
             trigger: .manual
         ))
 
-        #expect(presentation.releases.map(\.version) == ["1.2.0", "1.2.1"])
+        #expect(presentation.releases.map(\.version) == ["1.2.0", "1.2.1", "1.2.2"])
         #expect(storage.lastPresentedVersion == "1.2.1")
     }
 
