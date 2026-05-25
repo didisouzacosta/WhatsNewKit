@@ -2,7 +2,7 @@ import SwiftUI
 import WhatsNewKit
 
 struct ContentView: View {
-    @State private var canPresentWhatsNew = true
+    @State private var canPresentWhatsNew = DemoAccessState.isReturningUser
     @State private var showWhatsNew = false
 
     private let releases = DemoReleaseCatalog.releases
@@ -34,6 +34,9 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("WhatsNewKit Demo")
+            .task {
+                DemoAccessState.registerInitialAccessIfNeeded()
+            }
             .whatsNewSheet(
                 releases: releases,
                 canPresent: canPresentWhatsNew,
@@ -56,6 +59,23 @@ struct ContentView: View {
         case let .stepProgress(release, index, count):
             print("WhatsNew step: \(index + 1)/\(count) - \(release.version)")
         }
+    }
+}
+
+private enum DemoAccessState {
+    private static let hasAccessedAppKey = "WhatsNewKitDemo.hasAccessedApp"
+
+    static var isReturningUser: Bool {
+        UserDefaults.standard.bool(forKey: hasAccessedAppKey)
+    }
+
+    static func registerInitialAccessIfNeeded() {
+        guard isReturningUser == false else {
+            return
+        }
+
+        WhatsNewPresentationState.markCurrentVersionAsSeen()
+        UserDefaults.standard.set(true, forKey: hasAccessedAppKey)
     }
 }
 

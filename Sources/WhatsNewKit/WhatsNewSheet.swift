@@ -11,7 +11,6 @@ public struct WhatsNewSheet: View {
     private let onFinish: () -> Void
 
     @State private var selectedIndex = 0
-    @State private var scrollPosition: Int? = 0
     @State private var hasEmittedOpen = false
     @State private var hasEmittedClose = false
     @Environment(\.dismiss) private var dismiss
@@ -35,7 +34,7 @@ public struct WhatsNewSheet: View {
                 .navigationTitle(WhatsNewLocalized.navigationTitle)
                 #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbarBackground(.hidden, for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
                 #endif
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
@@ -58,35 +57,15 @@ public struct WhatsNewSheet: View {
 
     @ViewBuilder
     private var pages: some View {
-        #if os(iOS)
-        ScrollView(.horizontal) {
-            LazyHStack(spacing: 0) {
-                releasePages
-            }
-            .scrollTargetLayout()
-        }
-        .scrollIndicators(.hidden)
-        .scrollTargetBehavior(.paging)
-        .scrollPosition(id: $scrollPosition)
-        .onChange(of: scrollPosition) { _, newValue in
-            guard let newValue else {
-                return
-            }
-
-            selectedIndex = newValue
-        }
-        .onChange(of: selectedIndex) { _, newValue in
-            scrollPosition = newValue
-            emitStepProgress(for: newValue)
-        }
-        #else
         TabView(selection: $selectedIndex) {
             releasePages
         }
+        #if os(iOS)
+        .tabViewStyle(.page(indexDisplayMode: .never))
+        #endif
         .onChange(of: selectedIndex) { _, newValue in
             emitStepProgress(for: newValue)
         }
-        #endif
     }
 
     @ViewBuilder
@@ -96,10 +75,6 @@ public struct WhatsNewSheet: View {
                 release: release,
                 isActive: selectedIndex == index
             )
-                #if os(iOS)
-                .containerRelativeFrame([.horizontal, .vertical])
-                .id(index)
-                #endif
                 .tag(index)
         }
     }
@@ -140,11 +115,8 @@ public struct WhatsNewSheet: View {
 
     private func advance() {
         guard isLastPage else {
-            let nextIndex = selectedIndex + 1
-
             withAnimation {
-                selectedIndex = nextIndex
-                scrollPosition = nextIndex
+                selectedIndex += 1
             }
             return
         }
