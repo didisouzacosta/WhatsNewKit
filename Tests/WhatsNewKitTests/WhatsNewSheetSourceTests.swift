@@ -3,15 +3,16 @@ import Testing
 
 @Suite("WhatsNew sheet source")
 struct WhatsNewSheetSourceTests {
-    @Test("content uses a transparent overlay header and safe area aware scroll spacing")
-    func contentUsesTransparentOverlayHeaderAndSafeAreaAwareScrollSpacing() throws {
+    @Test("content uses standard navigation and safe area aware scroll spacing")
+    func contentUsesStandardNavigationAndSafeAreaAwareScrollSpacing() throws {
         let source = try sourceFile(named: "WhatsNewSheet.swift")
 
-        #expect(source.contains("private var header: some View"))
+        #expect(source.contains("NavigationStack"))
+        #expect(source.contains(".navigationTitle(WhatsNewLocalized.navigationTitle)"))
+        #expect(source.contains(".toolbarBackground(.hidden, for: .navigationBar)"))
         #expect(source.contains("proxy.safeAreaInsets.top + pageTopContentSpacing"))
         #expect(source.contains("proxy.safeAreaInsets.bottom + pageBottomContentSpacing"))
-        #expect(source.contains("NavigationStack") == false)
-        #expect(source.contains(".navigationTitle(") == false)
+        #expect(source.contains("private var header: some View") == false)
         #expect(source.contains(".toolbarBackground(.visible, for: .navigationBar)") == false)
     }
 

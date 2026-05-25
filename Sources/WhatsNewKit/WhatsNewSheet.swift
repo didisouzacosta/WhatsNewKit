@@ -7,7 +7,6 @@ private let defaultMediaAspectRatio: CGFloat = 16 / 9
 private let pageContentPadding: CGFloat = 24
 private let pageTopContentSpacing: CGFloat = 96
 private let pageBottomContentSpacing: CGFloat = 144
-private let headerButtonSize: CGFloat = 56
 
 public struct WhatsNewSheet: View {
     private let presentation: WhatsNewPresentation
@@ -30,13 +29,26 @@ public struct WhatsNewSheet: View {
     }
 
     public var body: some View {
-        ZStack(alignment: .top) {
+        NavigationStack {
             pages
                 .safeAreaInset(edge: .bottom, content: {
                     footer
                 })
-
-            header
+                .navigationTitle(WhatsNewLocalized.navigationTitle)
+                #if os(iOS)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbarBackground(.hidden, for: .navigationBar)
+                #endif
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button {
+                            finish()
+                        } label: {
+                            Image(systemName: "xmark")
+                        }
+                        .accessibilityLabel(WhatsNewLocalized.closeAccessibilityLabel)
+                    }
+                }
         }
         .onAppear {
             emitOpenIfNeeded()
@@ -44,34 +56,6 @@ public struct WhatsNewSheet: View {
         .onDisappear {
             emitCloseIfNeeded()
         }
-    }
-
-    private var header: some View {
-        HStack {
-            Button {
-                finish()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.title.weight(.regular))
-                    .frame(width: headerButtonSize, height: headerButtonSize)
-                    .background(.ultraThinMaterial, in: Circle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(WhatsNewLocalized.closeAccessibilityLabel)
-
-            Spacer()
-
-            Text(WhatsNewLocalized.navigationTitle)
-                .font(.title3.weight(.semibold))
-
-            Spacer()
-
-            Color.clear
-                .frame(width: headerButtonSize, height: headerButtonSize)
-                .accessibilityHidden(true)
-        }
-        .safeAreaPadding(.horizontal, pageContentPadding)
-        .safeAreaPadding(.top, 16)
     }
 
     @ViewBuilder
