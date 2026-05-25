@@ -18,7 +18,7 @@
 
 `WhatsNewKit` helps SwiftUI apps present polished "What's New" sheets after an update. Declare the releases your app knows about, attach a view modifier, and the package decides which versions should be shown.
 
-The first launch never presents automatically, so new users are not interrupted. Returning users see every release newer than the last presented version and up to the current app version.
+Automatic presentation is controlled by your app through `canPresent`. When that value is `true`, users see every release newer than the last presented version and up to the current app version. When it is `false`, nothing is shown or marked as seen, so the pending release remains eligible for a later evaluation.
 
 <p align="center">
   <img alt="WhatsNewKit overview release page" src="Docs/Images/whats-new-overview.png" width="260">
@@ -68,13 +68,15 @@ You can also add the package in Xcode through `File > Add Package Dependencies`.
 
 ### Automatic Presentation
 
-Attach `.whatsNewSheet(releases:)` to the screen that should host the sheet. By default, `WhatsNewKit` reads `CFBundleShortVersionString` from the app bundle.
+Attach `.whatsNewSheet(releases:canPresent:)` to the screen that should host the sheet. By default, `WhatsNewKit` reads `CFBundleShortVersionString` from the app bundle. Drive `canPresent` from your own app readiness, such as onboarding completion, authentication state, or the moment your main UI is ready to present a sheet.
 
 ```swift
 import SwiftUI
 import WhatsNewKit
 
 struct HomeView: View {
+    @State private var canPresentWhatsNew = false
+
     private let releases = [
         WhatsNewRelease(
             version: "3.0.0",
@@ -92,26 +94,54 @@ struct HomeView: View {
 
     var body: some View {
         ContentView()
-            .whatsNewSheet(releases: releases)
+            .whatsNewSheet(
+                releases: releases,
+                canPresent: canPresentWhatsNew
+            )
+            .task {
+                canPresentWhatsNew = true
+            }
     }
 }
 ```
 
-If the last presented version was `2.0.0` and the current app version is `3.0.0`, the sheet presents releases after `2.0.0` through `3.0.0`, ordered by version.
+If the last presented version was `2.0.0` and the current app version is `3.0.0`, the sheet presents releases after `2.0.0` through `3.0.0`, ordered by version. If `canPresent` is `false`, the sheet is not presented and `2.0.0` remains the last presented version.
 
-### Onboarding Baseline
+### Presentation Rules
 
-If your app shows onboarding to new users, call `WhatsNewPresentationState.markCurrentVersionAsBaseline()` when that onboarding finishes. This records the current app version as already considered without opening a sheet or emitting analytics events.
+Automatic presentation uses three inputs:
+
+- `canPresent`, provided by the app that integrates `WhatsNewKit`.
+- `currentVersion`, read from `CFBundleShortVersionString` by default or passed explicitly.
+- `lastPresentedVersion`, stored internally after the user finishes a What's New presentation.
+
+The automatic sheet is shown only when all of these conditions are true:
+
+- `canPresent` is `true`.
+- At least one declared release has a version less than or equal to `currentVersion`.
+- At least one eligible release is newer than `lastPresentedVersion`, or no version has been presented yet.
+
+These cases do not show the sheet:
+
+- `canPresent` is `false`, even when there is a new eligible version.
+- A release version is greater than `currentVersion`.
+- The eligible release version was already presented for that user.
+
+When `canPresent` is `false`, `WhatsNewKit` does not mark anything as presented. If `canPresent` later changes to `true`, the framework evaluates the same pending releases again and presents any eligible version that has not already been shown.
+
+### Marking Versions As Seen
+
+If your app needs to skip the current version without presenting the sheet, call `WhatsNewPresentationState.markCurrentVersionAsSeen()`. This records the current app version as already considered without opening a sheet or emitting analytics events.
 
 ```swift
 import WhatsNewKit
 
 func onboardingDidFinish() {
-    WhatsNewPresentationState.markCurrentVersionAsBaseline()
+    WhatsNewPresentationState.markCurrentVersionAsSeen()
 }
 ```
 
-Only call this for users who completed onboarding in the current app version. Existing users without a stored WhatsNewKit baseline should remain eligible for any pending automatic release notes.
+Only call this when your app intentionally wants to suppress the current version. If you only need to delay presentation, keep `canPresent` as `false` until your app is ready.
 
 ### Manual Presentation
 
@@ -194,6 +224,7 @@ For previews, tests, or custom rollout logic, pass an explicit `currentVersion`:
 ```swift
 .whatsNewSheet(
     releases: releases,
+    canPresent: userCanSeeWhatsNew,
     currentVersion: "3.0.0"
 )
 ```

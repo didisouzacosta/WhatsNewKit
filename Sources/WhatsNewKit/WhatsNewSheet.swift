@@ -97,7 +97,7 @@ public struct WhatsNewSheet: View {
                 isActive: selectedIndex == index
             )
                 #if os(iOS)
-                .containerRelativeFrame(.horizontal)
+                .containerRelativeFrame([.horizontal, .vertical])
                 .id(index)
                 #endif
                 .tag(index)

@@ -5,6 +5,7 @@ enum WhatsNewPresentationPolicy {
         currentVersion: String,
         releases: [WhatsNewRelease],
         storage: WhatsNewStorage,
+        canPresent: Bool = true,
         trigger: WhatsNewPresentationTrigger = .appLaunch
     ) -> WhatsNewPresentation? {
         if trigger == .manual {
@@ -19,8 +20,7 @@ enum WhatsNewPresentationPolicy {
             return WhatsNewPresentation(releases: visibleReleases)
         }
 
-        guard storage.hasCompletedFirstLaunch else {
-            storage.hasCompletedFirstLaunch = true
+        guard canPresent else {
             return nil
         }
 
@@ -41,8 +41,6 @@ enum WhatsNewPresentationPolicy {
         _ presentation: WhatsNewPresentation,
         storage: WhatsNewStorage
     ) {
-        storage.hasCompletedFirstLaunch = true
-
         guard let latestVersion = presentation.releases
             .map(\.version)
             .max(by: { SemanticVersion($0) < SemanticVersion($1) })
@@ -57,7 +55,6 @@ enum WhatsNewPresentationPolicy {
         currentVersion: String,
         storage: WhatsNewStorage
     ) {
-        storage.hasCompletedFirstLaunch = true
         storage.lastPresentedVersion = currentVersion
     }
 

@@ -2,6 +2,7 @@ import SwiftUI
 import WhatsNewKit
 
 struct ContentView: View {
+    @State private var canPresentWhatsNew = true
     @State private var showWhatsNew = false
 
     private let releases = DemoReleaseCatalog.releases
@@ -11,6 +12,7 @@ struct ContentView: View {
             List {
                 Section("Demo status") {
                     LabeledContent("Current version", value: WhatsNewAppVersion.current)
+                    Toggle("Allow automatic What's New", isOn: $canPresentWhatsNew)
                 }
 
                 Section("Actions") {
@@ -34,6 +36,7 @@ struct ContentView: View {
             .navigationTitle("WhatsNewKit Demo")
             .whatsNewSheet(
                 releases: releases,
+                canPresent: canPresentWhatsNew,
                 onEvent: trackWhatsNewEvent
             )
             .whatsNewSheet(

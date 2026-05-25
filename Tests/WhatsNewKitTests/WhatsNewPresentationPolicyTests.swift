@@ -3,46 +3,75 @@ import Testing
 
 @Suite("WhatsNew presentation policy")
 struct WhatsNewPresentationPolicyTests {
-    @Test("first app launch never presents the sheet")
-    func firstAppLaunchDoesNotPresent() {
-        let storage = InMemoryWhatsNewStorage()
-        let releases = [
-            WhatsNewRelease(version: "1", title: "Initial", topics: [])
-        ]
-
-        let presentation = WhatsNewPresentationPolicy.presentation(
-            currentVersion: "1",
-            releases: releases,
-            storage: storage,
-            trigger: .appLaunch
-        )
-
-        #expect(presentation == nil)
-        #expect(storage.hasCompletedFirstLaunch)
-    }
-
-    @Test("first app launch does not store the current version as presented")
-    func firstAppLaunchDoesNotStoreLastPresentedVersion() {
+    @Test("automatic presentation waits until canPresent is true without registering the release")
+    func automaticPresentationWaitsUntilCanPresentIsTrue() throws {
         let storage = InMemoryWhatsNewStorage()
         let releases = [
             WhatsNewRelease(version: "1.2.0", title: "Current", topics: [])
         ]
 
-        _ = WhatsNewPresentationPolicy.presentation(
+        let blockedPresentation = WhatsNewPresentationPolicy.presentation(
+            currentVersion: "1.2.0",
+            releases: releases,
+            storage: storage,
+            canPresent: false,
+            trigger: .appLaunch
+        )
+
+        #expect(blockedPresentation == nil)
+        #expect(storage.lastPresentedVersion == nil)
+
+        let presentation = try #require(WhatsNewPresentationPolicy.presentation(
+            currentVersion: "1.2.0",
+            releases: releases,
+            storage: storage,
+            canPresent: true,
+            trigger: .appLaunch
+        ))
+
+        #expect(presentation.releases.map(\.version) == ["1.2.0"])
+        #expect(storage.lastPresentedVersion == nil)
+    }
+
+    @Test("automatic presentation can present on the first evaluation when canPresent is true")
+    func automaticPresentationCanPresentOnFirstEvaluationWhenCanPresentIsTrue() throws {
+        let storage = InMemoryWhatsNewStorage()
+        let releases = [
+            WhatsNewRelease(version: "1", title: "Initial", topics: [])
+        ]
+
+        let presentation = try #require(WhatsNewPresentationPolicy.presentation(
+            currentVersion: "1",
+            releases: releases,
+            storage: storage,
+            trigger: .appLaunch
+        ))
+
+        #expect(presentation.releases.map(\.version) == ["1"])
+        #expect(storage.lastPresentedVersion == nil)
+    }
+
+    @Test("automatic presentation does not present releases newer than the current app version")
+    func automaticPresentationDoesNotPresentReleasesNewerThanCurrentAppVersion() {
+        let storage = InMemoryWhatsNewStorage()
+        let releases = [
+            WhatsNewRelease(version: "1.2.1", title: "Future", topics: [])
+        ]
+
+        let presentation = WhatsNewPresentationPolicy.presentation(
             currentVersion: "1.2.0",
             releases: releases,
             storage: storage,
             trigger: .appLaunch
         )
 
-        #expect(storage.hasCompletedFirstLaunch)
+        #expect(presentation == nil)
         #expect(storage.lastPresentedVersion == nil)
     }
 
-    @Test("second app launch presents current release when no release has been registered")
-    func secondAppLaunchPresentsCurrentReleaseWhenNoReleaseHasBeenRegistered() throws {
+    @Test("automatic presentation presents current release when no release has been registered")
+    func automaticPresentationPresentsCurrentReleaseWhenNoReleaseHasBeenRegistered() throws {
         let storage = InMemoryWhatsNewStorage()
-        storage.hasCompletedFirstLaunch = true
         let releases = [
             WhatsNewRelease(version: "1.2.0", title: "Current", topics: [])
         ]
@@ -79,7 +108,6 @@ struct WhatsNewPresentationPolicyTests {
         )
 
         #expect(presentation == nil)
-        #expect(storage.hasCompletedFirstLaunch)
         #expect(storage.lastPresentedVersion == "1.2.1")
     }
 
@@ -110,7 +138,6 @@ struct WhatsNewPresentationPolicyTests {
     @Test("existing users without a baseline can still see the current release")
     func existingUsersWithoutBaselineCanStillSeeCurrentRelease() throws {
         let storage = InMemoryWhatsNewStorage()
-        storage.hasCompletedFirstLaunch = true
         let releases = [
             WhatsNewRelease(version: "1.2.1", title: "Current", topics: [])
         ]
@@ -141,14 +168,12 @@ struct WhatsNewPresentationPolicyTests {
         ))
 
         #expect(presentation.releases.map(\.version) == ["1"])
-        #expect(storage.hasCompletedFirstLaunch == false)
         #expect(storage.lastPresentedVersion == nil)
     }
 
     @Test("manual trigger presents every release even after current releases were already registered")
     func manualTriggerPresentsEveryReleaseAfterCurrentReleasesWereRegistered() throws {
         let storage = InMemoryWhatsNewStorage()
-        storage.hasCompletedFirstLaunch = true
         storage.lastPresentedVersion = "2"
         let releases = [
             WhatsNewRelease(version: "1", title: "One", topics: []),
@@ -212,7 +237,6 @@ struct WhatsNewPresentationPolicyTests {
     @Test("existing users see every missed release up to the current app version")
     func existingUsersSeeMissedReleases() throws {
         let storage = InMemoryWhatsNewStorage()
-        storage.hasCompletedFirstLaunch = true
         storage.lastPresentedVersion = "2"
 
         let releases = [
@@ -236,7 +260,6 @@ struct WhatsNewPresentationPolicyTests {
     @Test("completed presentations are registered at the latest displayed version")
     func completedPresentationsRegisterLatestDisplayedVersion() throws {
         let storage = InMemoryWhatsNewStorage()
-        storage.hasCompletedFirstLaunch = true
         storage.lastPresentedVersion = "2"
         let presentation = WhatsNewPresentation(releases: [
             WhatsNewRelease(version: "3", title: "Three", topics: []),
@@ -251,7 +274,6 @@ struct WhatsNewPresentationPolicyTests {
     @Test("semantic versions with x.x.x structure are filtered and sorted numerically")
     func semanticPatchVersionsAreFilteredAndSortedNumerically() throws {
         let storage = InMemoryWhatsNewStorage()
-        storage.hasCompletedFirstLaunch = true
         storage.lastPresentedVersion = "1.0.0"
 
         let releases = [
@@ -274,7 +296,6 @@ struct WhatsNewPresentationPolicyTests {
     @Test("semantic versions with x.x structure are treated as equivalent to x.x.0")
     func semanticMinorVersionsAreEquivalentToZeroPatchVersions() throws {
         let storage = InMemoryWhatsNewStorage()
-        storage.hasCompletedFirstLaunch = true
         storage.lastPresentedVersion = "1.0"
 
         let releases = [
@@ -297,7 +318,6 @@ struct WhatsNewPresentationPolicyTests {
     @Test("completed semantic version presentations register the highest numeric version")
     func completedSemanticVersionPresentationsRegisterHighestNumericVersion() {
         let storage = InMemoryWhatsNewStorage()
-        storage.hasCompletedFirstLaunch = true
         storage.lastPresentedVersion = "1.0.0"
         let presentation = WhatsNewPresentation(releases: [
             WhatsNewRelease(version: "2.5.1", title: "Two five one", topics: []),
@@ -313,7 +333,6 @@ struct WhatsNewPresentationPolicyTests {
     @Test("completed automatic presentations continue registering the latest displayed version")
     func completedAutomaticPresentationsContinueRegisteringLatestDisplayedVersion() throws {
         let storage = InMemoryWhatsNewStorage()
-        storage.hasCompletedFirstLaunch = true
         storage.lastPresentedVersion = "1.2.1"
         let releases = [
             WhatsNewRelease(version: "1.2.2", title: "Next", topics: [])
@@ -333,6 +352,5 @@ struct WhatsNewPresentationPolicyTests {
 }
 
 private final class InMemoryWhatsNewStorage: WhatsNewStorage {
-    var hasCompletedFirstLaunch = false
     var lastPresentedVersion: String?
 }

@@ -3,12 +3,14 @@ import SwiftUI
 public extension View {
     func whatsNewSheet(
         releases: [WhatsNewRelease],
+        canPresent: Bool = true,
         currentVersion: String = WhatsNewAppVersion.current,
         onEvent: @escaping (WhatsNewAnalyticsEvent) -> Void = { _ in }
     ) -> some View {
         modifier(
             WhatsNewAutoPresentationModifier(
                 releases: releases,
+                canPresent: canPresent,
                 currentVersion: currentVersion,
                 onEvent: onEvent
             )
@@ -34,28 +36,21 @@ public extension View {
 
 private struct WhatsNewAutoPresentationModifier: ViewModifier {
     let releases: [WhatsNewRelease]
+    let canPresent: Bool
     let currentVersion: String
     let onEvent: (WhatsNewAnalyticsEvent) -> Void
 
     private let storage = UserDefaultsWhatsNewStorage()
 
     @State private var activePresentation: WhatsNewPresentation?
-    @State private var hasEvaluated = false
 
     func body(content: Content) -> some View {
         content
             .onAppear {
-                guard hasEvaluated == false else {
-                    return
-                }
-
-                hasEvaluated = true
-                activePresentation = WhatsNewPresentationPolicy.presentation(
-                    currentVersion: currentVersion,
-                    releases: releases,
-                    storage: storage,
-                    trigger: .appLaunch
-                )
+                evaluatePresentation()
+            }
+            .onChange(of: canPresent) { _, _ in
+                evaluatePresentation()
             }
             .sheet(item: $activePresentation) { presentation in
                 WhatsNewSheet(
@@ -66,6 +61,20 @@ private struct WhatsNewAutoPresentationModifier: ViewModifier {
                     activePresentation = nil
                 }
             }
+    }
+
+    private func evaluatePresentation() {
+        guard activePresentation == nil else {
+            return
+        }
+
+        activePresentation = WhatsNewPresentationPolicy.presentation(
+            currentVersion: currentVersion,
+            releases: releases,
+            storage: storage,
+            canPresent: canPresent,
+            trigger: .appLaunch
+        )
     }
 }
 
