@@ -70,9 +70,10 @@ public struct WhatsNewSheet: View {
 
     @ViewBuilder
     private var releasePages: some View {
-        ForEach(Array(presentation.releases.enumerated()), id: \.element.id) { index, release in
+        ForEach(Array(presentation.steps.enumerated()), id: \.element.id) { index, step in
             WhatsNewReleasePage(
-                release: release,
+                release: step.release,
+                page: step.page,
                 isActive: selectedIndex == index
             )
                 .tag(index)
@@ -84,7 +85,7 @@ public struct WhatsNewSheet: View {
             if presentation.showsStepIndicator {
                 StepIndicator(
                     currentIndex: selectedIndex,
-                    count: presentation.releases.count
+                    count: presentation.steps.count
                 )
             }
 
@@ -110,7 +111,7 @@ public struct WhatsNewSheet: View {
     }
 
     private var isLastPage: Bool {
-        selectedIndex >= presentation.releases.count - 1
+        selectedIndex >= presentation.steps.count - 1
     }
 
     private func advance() {
@@ -149,26 +150,30 @@ public struct WhatsNewSheet: View {
     }
 
     private func emitStepProgress(for index: Int) {
-        guard presentation.releases.indices.contains(index) else {
+        guard presentation.steps.indices.contains(index) else {
             return
         }
 
+        let step = presentation.steps[index]
+
         onEvent(.stepProgress(
-            release: presentation.releases[index],
+            release: step.release,
+            page: step.page,
             index: index,
-            count: presentation.releases.count
+            count: presentation.steps.count
         ))
     }
 }
 
 private struct WhatsNewReleasePage: View {
     let release: WhatsNewRelease
+    let page: WhatsNewPage
     let isActive: Bool
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                if let media = release.media {
+                if let media = page.media {
                     WhatsNewMediaView(
                         media: media,
                         isActive: isActive
@@ -176,7 +181,7 @@ private struct WhatsNewReleasePage: View {
                 }
 
                 VStack(alignment: .center, spacing: 8) {
-                    Text(release.title)
+                    Text(page.title)
                         .font(.largeTitle.bold())
                         .multilineTextAlignment(.center)
 
@@ -189,7 +194,7 @@ private struct WhatsNewReleasePage: View {
                 .padding(.bottom, 4)
 
                 VStack(alignment: .leading, spacing: 18) {
-                    ForEach(release.topics) { topic in
+                    ForEach(page.topics) { topic in
                         WhatsNewTopicRow(topic: topic)
                     }
                 }

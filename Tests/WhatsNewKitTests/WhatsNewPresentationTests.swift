@@ -21,4 +21,19 @@ struct WhatsNewPresentationTests {
 
         #expect(presentation.showsStepIndicator)
     }
+
+    @Test("single release can present multiple pages")
+    func singleReleaseCanPresentMultiplePages() {
+        let presentation = WhatsNewPresentation(releases: [
+            WhatsNewRelease(version: "1.2.0", pages: [
+                WhatsNewPage(id: "cover", title: "Cover", topics: []),
+                WhatsNewPage(id: "teleprompter", title: "Teleprompter", topics: [])
+            ])
+        ])
+
+        #expect(presentation.releases.map(\.version) == ["1.2.0"])
+        #expect(presentation.steps.map(\.release.version) == ["1.2.0", "1.2.0"])
+        #expect(presentation.steps.map(\.page.title) == ["Cover", "Teleprompter"])
+        #expect(presentation.showsStepIndicator)
+    }
 }

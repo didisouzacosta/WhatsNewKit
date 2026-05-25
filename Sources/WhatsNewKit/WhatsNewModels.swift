@@ -5,11 +5,29 @@ import UIKit
 
 public struct WhatsNewRelease: Identifiable, Equatable, Sendable {
     public let version: String
-    public let title: String
-    public let media: WhatsNewMedia?
-    public let topics: [WhatsNewTopic]
+    public let pages: [WhatsNewPage]
 
     public var id: String { version }
+
+    public var title: String {
+        pages.first?.title ?? ""
+    }
+
+    public var media: WhatsNewMedia? {
+        pages.first?.media
+    }
+
+    public var topics: [WhatsNewTopic] {
+        pages.first?.topics ?? []
+    }
+
+    public init(
+        version: String,
+        pages: [WhatsNewPage]
+    ) {
+        self.version = version
+        self.pages = pages
+    }
 
     public init(
         version: String,
@@ -17,7 +35,32 @@ public struct WhatsNewRelease: Identifiable, Equatable, Sendable {
         media: WhatsNewMedia? = nil,
         topics: [WhatsNewTopic]
     ) {
-        self.version = version
+        self.init(
+            version: version,
+            pages: [
+                WhatsNewPage(
+                    title: title,
+                    media: media,
+                    topics: topics
+                )
+            ]
+        )
+    }
+}
+
+public struct WhatsNewPage: Identifiable, Equatable, Sendable {
+    public let id: String
+    public let title: String
+    public let media: WhatsNewMedia?
+    public let topics: [WhatsNewTopic]
+
+    public init(
+        id: String? = nil,
+        title: String,
+        media: WhatsNewMedia? = nil,
+        topics: [WhatsNewTopic]
+    ) {
+        self.id = id ?? title
         self.title = title
         self.media = media
         self.topics = topics
@@ -103,11 +146,27 @@ public struct WhatsNewPresentation: Identifiable, Equatable, Sendable {
     public let releases: [WhatsNewRelease]
 
     public var id: String {
-        releases.map(\.version).joined(separator: "|")
+        releases
+            .map { release in
+                let pageIDs = release.pages.map(\.id).joined(separator: ",")
+                return "\(release.version):\(pageIDs)"
+            }
+            .joined(separator: "|")
     }
 
     var showsStepIndicator: Bool {
-        releases.count > 1
+        steps.count > 1
+    }
+
+    var steps: [WhatsNewPresentationStep] {
+        releases.flatMap { release in
+            release.pages.map { page in
+                WhatsNewPresentationStep(
+                    release: release,
+                    page: page
+                )
+            }
+        }
     }
 
     public init(releases: [WhatsNewRelease]) {
@@ -115,10 +174,19 @@ public struct WhatsNewPresentation: Identifiable, Equatable, Sendable {
     }
 }
 
+struct WhatsNewPresentationStep: Identifiable, Equatable, Sendable {
+    let release: WhatsNewRelease
+    let page: WhatsNewPage
+
+    var id: String {
+        "\(release.version)|\(page.id)"
+    }
+}
+
 public enum WhatsNewAnalyticsEvent: Equatable, Sendable {
     case opened(WhatsNewPresentation)
     case closed(WhatsNewPresentation)
-    case stepProgress(release: WhatsNewRelease, index: Int, count: Int)
+    case stepProgress(release: WhatsNewRelease, page: WhatsNewPage, index: Int, count: Int)
 
     public var presentation: WhatsNewPresentation? {
         switch self {
@@ -131,7 +199,7 @@ public enum WhatsNewAnalyticsEvent: Equatable, Sendable {
 
     public var zeroBasedStepIndex: Int? {
         switch self {
-        case let .stepProgress(_, index, _):
+        case let .stepProgress(_, _, index, _):
             index
         case .opened, .closed:
             nil
@@ -144,7 +212,7 @@ public enum WhatsNewAnalyticsEvent: Equatable, Sendable {
 
     public var totalStepCount: Int? {
         switch self {
-        case let .stepProgress(_, _, count):
+        case let .stepProgress(_, _, _, count):
             count
         case .opened, .closed:
             nil

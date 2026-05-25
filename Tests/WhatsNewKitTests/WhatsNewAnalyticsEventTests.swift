@@ -6,13 +6,15 @@ struct WhatsNewAnalyticsEventTests {
     @Test("step progress includes zero and one based indexes")
     func stepProgressIncludesIndexes() {
         let release = WhatsNewRelease(version: "2.0.0", title: "Media", topics: [])
+        let page = release.pages[0]
         let event = WhatsNewAnalyticsEvent.stepProgress(
             release: release,
+            page: page,
             index: 1,
             count: 3
         )
 
-        #expect(event == .stepProgress(release: release, index: 1, count: 3))
+        #expect(event == .stepProgress(release: release, page: page, index: 1, count: 3))
         #expect(event.oneBasedStepIndex == 2)
         #expect(event.totalStepCount == 3)
     }
