@@ -7,30 +7,30 @@ let package = Package(
     defaultLocalization: "en",
     platforms: [
         .iOS("18.6"),
-        .macOS(.v14)
+        .macOS(.v14),
     ],
     products: [
         .library(
             name: "WhatsNewKit",
             targets: ["WhatsNewKit"]
-        )
+        ),
     ],
     dependencies: [
-        .package(url: "https://github.com/onevcat/Kingfisher.git", from: "8.9.0")
+        .package(url: "https://github.com/onevcat/Kingfisher.git", from: "8.9.0"),
     ],
     targets: [
         .target(
             name: "WhatsNewKit",
             dependencies: [
-                .product(name: "Kingfisher", package: "Kingfisher")
+                .product(name: "Kingfisher", package: "Kingfisher"),
             ],
             resources: [
-                .process("Resources")
+                .process("Resources"),
             ]
         ),
         .testTarget(
             name: "WhatsNewKitTests",
             dependencies: ["WhatsNewKit"]
-        )
+        ),
     ]
 )

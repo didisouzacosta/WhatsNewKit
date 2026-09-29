@@ -3,6 +3,9 @@ import Testing
 
 @Suite("WhatsNew topics")
 struct WhatsNewTopicTests {
+
+    // MARK: - Tests
+
     @Test("topics can provide a system image icon")
     func topicsCanProvideSystemImageIcon() {
         let topic = WhatsNewTopic(

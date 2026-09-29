@@ -3,11 +3,14 @@ import Testing
 
 @Suite("WhatsNew presentation policy")
 struct WhatsNewPresentationPolicyTests {
+
+    // MARK: - Tests
+
     @Test("automatic presentation waits until canPresent is true without registering the release")
     func automaticPresentationWaitsUntilCanPresentIsTrue() throws {
         let storage = InMemoryWhatsNewStorage()
         let releases = [
-            WhatsNewRelease(version: "1.2.0", title: "Current", topics: [])
+            WhatsNewRelease(version: "1.2.0", title: "Current", topics: []),
         ]
 
         let blockedPresentation = WhatsNewPresentationPolicy.presentation(
@@ -37,7 +40,7 @@ struct WhatsNewPresentationPolicyTests {
     func automaticPresentationCanPresentOnFirstEvaluationWhenCanPresentIsTrue() throws {
         let storage = InMemoryWhatsNewStorage()
         let releases = [
-            WhatsNewRelease(version: "1", title: "Initial", topics: [])
+            WhatsNewRelease(version: "1", title: "Initial", topics: []),
         ]
 
         let presentation = try #require(WhatsNewPresentationPolicy.presentation(
@@ -55,7 +58,7 @@ struct WhatsNewPresentationPolicyTests {
     func automaticPresentationDoesNotPresentReleasesNewerThanCurrentAppVersion() {
         let storage = InMemoryWhatsNewStorage()
         let releases = [
-            WhatsNewRelease(version: "1.2.1", title: "Future", topics: [])
+            WhatsNewRelease(version: "1.2.1", title: "Future", topics: []),
         ]
 
         let presentation = WhatsNewPresentationPolicy.presentation(
@@ -73,7 +76,7 @@ struct WhatsNewPresentationPolicyTests {
     func automaticPresentationPresentsCurrentReleaseWhenNoReleaseHasBeenRegistered() throws {
         let storage = InMemoryWhatsNewStorage()
         let releases = [
-            WhatsNewRelease(version: "1.2.0", title: "Current", topics: [])
+            WhatsNewRelease(version: "1.2.0", title: "Current", topics: []),
         ]
 
         let presentation = try #require(WhatsNewPresentationPolicy.presentation(
@@ -92,7 +95,7 @@ struct WhatsNewPresentationPolicyTests {
         let storage = InMemoryWhatsNewStorage()
         let releases = [
             WhatsNewRelease(version: "1.2.0", title: "Previous", topics: []),
-            WhatsNewRelease(version: "1.2.1", title: "Current", topics: [])
+            WhatsNewRelease(version: "1.2.1", title: "Current", topics: []),
         ]
 
         WhatsNewPresentationPolicy.markCurrentVersionAsBaseline(
@@ -116,7 +119,7 @@ struct WhatsNewPresentationPolicyTests {
         let storage = InMemoryWhatsNewStorage()
         let releases = [
             WhatsNewRelease(version: "1.2.1", title: "Baseline", topics: []),
-            WhatsNewRelease(version: "1.2.2", title: "Next", topics: [])
+            WhatsNewRelease(version: "1.2.2", title: "Next", topics: []),
         ]
 
         WhatsNewPresentationPolicy.markCurrentVersionAsBaseline(
@@ -139,7 +142,7 @@ struct WhatsNewPresentationPolicyTests {
     func existingUsersWithoutBaselineCanStillSeeCurrentRelease() throws {
         let storage = InMemoryWhatsNewStorage()
         let releases = [
-            WhatsNewRelease(version: "1.2.1", title: "Current", topics: [])
+            WhatsNewRelease(version: "1.2.1", title: "Current", topics: []),
         ]
 
         let presentation = try #require(WhatsNewPresentationPolicy.presentation(
@@ -157,7 +160,7 @@ struct WhatsNewPresentationPolicyTests {
     func manualTriggerPresentsBeforeAutomaticBaselineExists() throws {
         let storage = InMemoryWhatsNewStorage()
         let releases = [
-            WhatsNewRelease(version: "1", title: "Initial", topics: [])
+            WhatsNewRelease(version: "1", title: "Initial", topics: []),
         ]
 
         let presentation = try #require(WhatsNewPresentationPolicy.presentation(
@@ -178,7 +181,7 @@ struct WhatsNewPresentationPolicyTests {
         let releases = [
             WhatsNewRelease(version: "1", title: "One", topics: []),
             WhatsNewRelease(version: "2", title: "Two", topics: []),
-            WhatsNewRelease(version: "3", title: "Future", topics: [])
+            WhatsNewRelease(version: "3", title: "Future", topics: []),
         ]
 
         let presentation = try #require(WhatsNewPresentationPolicy.presentation(
@@ -196,7 +199,7 @@ struct WhatsNewPresentationPolicyTests {
         let storage = InMemoryWhatsNewStorage()
         let releases = [
             WhatsNewRelease(version: "1", title: "Current", topics: []),
-            WhatsNewRelease(version: "2", title: "Next", topics: [])
+            WhatsNewRelease(version: "2", title: "Next", topics: []),
         ]
 
         let presentation = try #require(WhatsNewPresentationPolicy.presentation(
@@ -215,7 +218,7 @@ struct WhatsNewPresentationPolicyTests {
         let releases = [
             WhatsNewRelease(version: "1.2.0", title: "Previous", topics: []),
             WhatsNewRelease(version: "1.2.1", title: "Current", topics: []),
-            WhatsNewRelease(version: "1.2.2", title: "Future", topics: [])
+            WhatsNewRelease(version: "1.2.2", title: "Future", topics: []),
         ]
 
         WhatsNewPresentationPolicy.markCurrentVersionAsBaseline(
@@ -243,7 +246,7 @@ struct WhatsNewPresentationPolicyTests {
             WhatsNewRelease(version: "5", title: "Five", topics: []),
             WhatsNewRelease(version: "3", title: "Three", topics: []),
             WhatsNewRelease(version: "4", title: "Four", topics: []),
-            WhatsNewRelease(version: "6", title: "Future", topics: [])
+            WhatsNewRelease(version: "6", title: "Future", topics: []),
         ]
 
         let presentation = try #require(WhatsNewPresentationPolicy.presentation(
@@ -263,7 +266,7 @@ struct WhatsNewPresentationPolicyTests {
         storage.lastPresentedVersion = "2"
         let presentation = WhatsNewPresentation(releases: [
             WhatsNewRelease(version: "3", title: "Three", topics: []),
-            WhatsNewRelease(version: "4", title: "Four", topics: [])
+            WhatsNewRelease(version: "4", title: "Four", topics: []),
         ])
 
         WhatsNewPresentationPolicy.register(presentation, storage: storage)
@@ -280,7 +283,7 @@ struct WhatsNewPresentationPolicyTests {
             WhatsNewRelease(version: "2.5.1", title: "Two five one", topics: []),
             WhatsNewRelease(version: "1.1.0", title: "One one zero", topics: []),
             WhatsNewRelease(version: "1.0.1", title: "One zero one", topics: []),
-            WhatsNewRelease(version: "2.5.2", title: "Future patch", topics: [])
+            WhatsNewRelease(version: "2.5.2", title: "Future patch", topics: []),
         ]
 
         let presentation = try #require(WhatsNewPresentationPolicy.presentation(
@@ -302,7 +305,7 @@ struct WhatsNewPresentationPolicyTests {
             WhatsNewRelease(version: "1.0.0", title: "Equivalent baseline", topics: []),
             WhatsNewRelease(version: "1.0.1", title: "Patch", topics: []),
             WhatsNewRelease(version: "1.1.0", title: "Minor", topics: []),
-            WhatsNewRelease(version: "1.1.1", title: "Future patch", topics: [])
+            WhatsNewRelease(version: "1.1.1", title: "Future patch", topics: []),
         ]
 
         let presentation = try #require(WhatsNewPresentationPolicy.presentation(
@@ -322,7 +325,7 @@ struct WhatsNewPresentationPolicyTests {
         let presentation = WhatsNewPresentation(releases: [
             WhatsNewRelease(version: "2.5.1", title: "Two five one", topics: []),
             WhatsNewRelease(version: "1.10.0", title: "One ten zero", topics: []),
-            WhatsNewRelease(version: "1.1.0", title: "One one zero", topics: [])
+            WhatsNewRelease(version: "1.1.0", title: "One one zero", topics: []),
         ])
 
         WhatsNewPresentationPolicy.register(presentation, storage: storage)
@@ -335,7 +338,7 @@ struct WhatsNewPresentationPolicyTests {
         let storage = InMemoryWhatsNewStorage()
         storage.lastPresentedVersion = "1.2.1"
         let releases = [
-            WhatsNewRelease(version: "1.2.2", title: "Next", topics: [])
+            WhatsNewRelease(version: "1.2.2", title: "Next", topics: []),
         ]
 
         let presentation = try #require(WhatsNewPresentationPolicy.presentation(
@@ -349,8 +352,4 @@ struct WhatsNewPresentationPolicyTests {
 
         #expect(storage.lastPresentedVersion == "1.2.2")
     }
-}
-
-private final class InMemoryWhatsNewStorage: WhatsNewStorage {
-    var lastPresentedVersion: String?
 }

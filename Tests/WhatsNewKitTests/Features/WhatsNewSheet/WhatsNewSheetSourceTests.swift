@@ -3,29 +3,35 @@ import Testing
 
 @Suite("WhatsNew sheet source")
 struct WhatsNewSheetSourceTests {
+
+    // MARK: - Tests
+
     @Test("content uses standard navigation and safe area aware scroll spacing")
     func contentUsesStandardNavigationAndSafeAreaAwareScrollSpacing() throws {
-        let source = try sourceFile(named: "WhatsNewSheet.swift")
+        let sheet = try sourceFile(at: "Features/WhatsNewSheet/WhatsNewSheet.swift")
+        let releasePage = try sourceFile(at: "Features/WhatsNewSheet/Components/WhatsNewReleasePage.swift")
 
-        #expect(source.contains("NavigationStack"))
-        #expect(source.contains(".navigationTitle(WhatsNewLocalized.navigationTitle)"))
-        #expect(source.contains(".toolbarBackground(.hidden, for: .navigationBar)"))
-        #expect(source.contains("proxy.safeAreaInsets.top + pageTopContentSpacing"))
-        #expect(source.contains("proxy.safeAreaInsets.bottom + pageBottomContentSpacing"))
-        #expect(source.contains("private var header: some View") == false)
-        #expect(source.contains(".toolbarBackground(.visible, for: .navigationBar)") == false)
+        #expect(sheet.contains("NavigationStack"))
+        #expect(sheet.contains(".navigationTitle(WhatsNewLocalized.navigationTitle)"))
+        #expect(sheet.contains(".toolbarBackground(.hidden, for: .navigationBar)"))
+        #expect(sheet.contains("private var header: some View") == false)
+        #expect(sheet.contains(".toolbarBackground(.visible, for: .navigationBar)") == false)
+        #expect(releasePage.contains("proxy.safeAreaInsets.top + WhatsNewSheetLayout.pageTopContentSpacing"))
+        #expect(releasePage.contains("proxy.safeAreaInsets.bottom + WhatsNewSheetLayout.pageBottomContentSpacing"))
     }
 
-    private func sourceFile(named fileName: String) throws -> String {
-        let testFile = URL(fileURLWithPath: #filePath)
-        let packageRoot = testFile
+    // MARK: - Private Methods
+
+    private func sourceFile(at relativePath: String) throws -> String {
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
         let sourceURL = packageRoot
-            .appendingPathComponent("Sources")
-            .appendingPathComponent("WhatsNewKit")
-            .appendingPathComponent(fileName)
+            .appendingPathComponent("Sources/WhatsNewKit")
+            .appendingPathComponent(relativePath)
 
         return try String(contentsOf: sourceURL, encoding: .utf8)
     }

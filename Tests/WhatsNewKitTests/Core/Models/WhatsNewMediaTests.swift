@@ -4,6 +4,9 @@ import Testing
 
 @Suite("WhatsNew media")
 struct WhatsNewMediaTests {
+
+    // MARK: - Tests
+
     @Test("media can reference a local image asset")
     func mediaCanReferenceLocalImageAsset() {
         let media = WhatsNewMedia.image("ReleaseHero")

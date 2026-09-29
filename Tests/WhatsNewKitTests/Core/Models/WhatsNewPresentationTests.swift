@@ -3,10 +3,13 @@ import Testing
 
 @Suite("WhatsNew presentation")
 struct WhatsNewPresentationTests {
+
+    // MARK: - Tests
+
     @Test("step indicator is hidden when presentation has one release")
     func stepIndicatorIsHiddenForSingleRelease() {
         let presentation = WhatsNewPresentation(releases: [
-            WhatsNewRelease(version: "1.0.0", title: "Single", topics: [])
+            WhatsNewRelease(version: "1.0.0", title: "Single", topics: []),
         ])
 
         #expect(presentation.showsStepIndicator == false)
@@ -16,7 +19,7 @@ struct WhatsNewPresentationTests {
     func stepIndicatorIsVisibleForMultipleReleases() {
         let presentation = WhatsNewPresentation(releases: [
             WhatsNewRelease(version: "1.0.0", title: "One", topics: []),
-            WhatsNewRelease(version: "1.1.0", title: "Two", topics: [])
+            WhatsNewRelease(version: "1.1.0", title: "Two", topics: []),
         ])
 
         #expect(presentation.showsStepIndicator)
@@ -27,8 +30,8 @@ struct WhatsNewPresentationTests {
         let presentation = WhatsNewPresentation(releases: [
             WhatsNewRelease(version: "1.2.0", pages: [
                 WhatsNewPage(id: "cover", title: "Cover", topics: []),
-                WhatsNewPage(id: "teleprompter", title: "Teleprompter", topics: [])
-            ])
+                WhatsNewPage(id: "teleprompter", title: "Teleprompter", topics: []),
+            ]),
         ])
 
         #expect(presentation.releases.map(\.version) == ["1.2.0"])

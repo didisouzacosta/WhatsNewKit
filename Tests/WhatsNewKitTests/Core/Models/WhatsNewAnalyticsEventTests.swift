@@ -3,6 +3,9 @@ import Testing
 
 @Suite("WhatsNew analytics events")
 struct WhatsNewAnalyticsEventTests {
+
+    // MARK: - Tests
+
     @Test("step progress includes zero and one based indexes")
     func stepProgressIncludesIndexes() {
         let release = WhatsNewRelease(version: "2.0.0", title: "Media", topics: [])
@@ -22,7 +25,7 @@ struct WhatsNewAnalyticsEventTests {
     @Test("open and close events expose their presentation")
     func openAndCloseExposePresentation() {
         let presentation = WhatsNewPresentation(releases: [
-            WhatsNewRelease(version: "1.0.0", title: "Start", topics: [])
+            WhatsNewRelease(version: "1.0.0", title: "Start", topics: []),
         ])
 
         #expect(WhatsNewAnalyticsEvent.opened(presentation).presentation == presentation)

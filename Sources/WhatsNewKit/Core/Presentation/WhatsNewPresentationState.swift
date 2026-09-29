@@ -1,6 +1,9 @@
 import Foundation
 
 public enum WhatsNewPresentationState {
+
+    // MARK: - Public Methods
+
     public static func markCurrentVersionAsBaseline(
         currentVersion: String = WhatsNewAppVersion.current,
         defaults: UserDefaults = .standard,
