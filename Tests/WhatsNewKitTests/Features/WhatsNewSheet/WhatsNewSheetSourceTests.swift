@@ -20,6 +20,25 @@ struct WhatsNewSheetSourceTests {
         #expect(releasePage.contains("proxy.safeAreaInsets.bottom + WhatsNewSheetLayout.pageBottomContentSpacing"))
     }
 
+    @Test("page content starts at the top and only scrolls when it does not fit")
+    func pageContentStartsAtTopAndOnlyScrollsWhenNeeded() throws {
+        let releasePage = try sourceFile(at: "Features/WhatsNewSheet/Components/WhatsNewReleasePage.swift")
+        let layout = try sourceFile(at: "Features/WhatsNewSheet/WhatsNewSheetLayout.swift")
+
+        #expect(releasePage.contains(".scrollBounceBehavior(.basedOnSize)"))
+        #expect(layout.contains("pageTopContentSpacing: CGFloat = 96") == false)
+        #expect(layout.contains("pageBottomContentSpacing: CGFloat = 144") == false)
+    }
+
+    @Test("footer keeps the prominent button over a transparent background")
+    func footerHasTransparentBackground() throws {
+        let footer = try sourceFile(at: "Features/WhatsNewSheet/Components/WhatsNewSheetFooter.swift")
+
+        #expect(footer.contains(".whatsNewGlassProminentButtonStyle()"))
+        #expect(footer.contains("Material") == false)
+        #expect(footer.contains(".background") == false)
+    }
+
     // MARK: - Private Methods
 
     private func sourceFile(at relativePath: String) throws -> String {

@@ -115,7 +115,7 @@
 ## Validação
 
 - Validações concluídas (2026-09-29, Xcode 27.0, Swift 6.4):
-  - `swift test`: 58 testes em 11 suítes passando (macOS, Swift Testing).
+  - `swift test`: 60 testes em 11 suítes passando (macOS, Swift Testing).
   - `swift build --build-tests`: sem avisos.
   - `xcodebuild` do Demo para `generic/platform=iOS Simulator`: build sem erros
     nem avisos; o pacote compila para iOS nesse build.

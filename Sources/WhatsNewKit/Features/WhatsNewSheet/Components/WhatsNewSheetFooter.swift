@@ -37,11 +37,6 @@ struct WhatsNewSheetFooter: View {
         .safeAreaPadding(.top, 16)
         .safeAreaPadding(.bottom, 16)
         .frame(maxWidth: .infinity)
-        .background {
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .ignoresSafeArea(edges: .bottom)
-        }
     }
 }
 

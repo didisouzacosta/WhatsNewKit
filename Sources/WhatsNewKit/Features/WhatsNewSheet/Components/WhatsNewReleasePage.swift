@@ -45,6 +45,7 @@ struct WhatsNewReleasePage: View {
                 .padding(.top, proxy.safeAreaInsets.top + WhatsNewSheetLayout.pageTopContentSpacing)
                 .padding(.bottom, proxy.safeAreaInsets.bottom + WhatsNewSheetLayout.pageBottomContentSpacing)
             }
+            .scrollBounceBehavior(.basedOnSize)
             .scrollClipDisabled()
         }
     }

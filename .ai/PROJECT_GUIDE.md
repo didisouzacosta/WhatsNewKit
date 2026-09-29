@@ -196,7 +196,7 @@ Demo/
 Registre comandos e resultados reais. Separe compilação e Simulator de
 validação em dispositivo físico e de serviços externos.
 
-- Testes unitários: `swift test` — 58 testes em 11 suítes passando em
+- Testes unitários: `swift test` — 60 testes em 11 suítes passando em
   2026-09-29 (macOS, Xcode 27.0, Swift 6.4).
 - Testes de integração: não há; `WhatsNewPresentationStatePublicAPITests` usa
   uma suíte `UserDefaults` descartável.
