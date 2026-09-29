@@ -244,7 +244,7 @@ Pass `onEvent` to track sheet presentation and step progress. Video media starts
             analytics.track("whats_new_opened", ["versions": presentation.id])
         case let .closed(presentation):
             analytics.track("whats_new_closed", ["versions": presentation.id])
-        case let .stepProgress(release, index, count):
+        case let .stepProgress(release, _, index, count):
             analytics.track("whats_new_step", [
                 "version": release.version,
                 "step": index + 1,
@@ -266,6 +266,27 @@ Open `Demo/WhatsNewKitDemo.xcodeproj` to run a sample app that imports this pack
 - autoplaying video media;
 - analytics event callbacks;
 - topic rows with SF Symbols.
+
+The demo keeps its code in `Demo/Sources` (`App`, `Core`, `Features/Home`) and its bundled content in `Demo/Resources`; both are synchronized folders in the Xcode project.
+
+## Development
+
+The package target is organized by responsibility:
+
+- `Sources/WhatsNewKit/Core`: public models, presentation policy, persistence, platform and localization helpers.
+- `Sources/WhatsNewKit/Features`: the `WhatsNewSheet` screen, its components and the presentation modifiers.
+- `Sources/WhatsNewKit/Resources`: the localized string catalog.
+- `Tests/WhatsNewKitTests`: Swift Testing suites that mirror `Core` and `Features`.
+
+Run the tests and the Swift lint gate before submitting changes:
+
+```sh
+swift test
+scripts/lint-swift.sh --fix
+scripts/lint-swift.sh
+```
+
+The lint gate requires SwiftLint 0.63.2 and SwiftFormat 0.63.0 (`brew install swiftlint swiftformat` or `scripts/install-swift-tools.sh`).
 
 ## Inspiration
 
