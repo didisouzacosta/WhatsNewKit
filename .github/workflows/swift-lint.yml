@@ -1,0 +1,22 @@
+name: Swift lint
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  lint:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode 26.6
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_26.6.app/Contents/Developer
+          export DEVELOPER_DIR=/Applications/Xcode_26.6.app/Contents/Developer
+          xcodebuild -version | grep -Fx 'Xcode 26.6'
+      - name: Install pinned SwiftLint and SwiftFormat
+        run: |
+          scripts/install-swift-tools.sh
+          echo "$GITHUB_WORKSPACE/.build/quality-tools/bin" >> "$GITHUB_PATH"
+      - name: Verify Swift tooling and lint
+        run: scripts/lint-swift.sh
