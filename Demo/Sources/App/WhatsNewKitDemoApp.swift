@@ -4,7 +4,7 @@ import SwiftUI
 struct WhatsNewKitDemoApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView(viewModel: HomeViewModel())
         }
     }
 }
