@@ -9,6 +9,8 @@ struct WhatsNewPresentationPolicyTests {
     @Test("automatic presentation waits until canPresent is true without registering the release")
     func automaticPresentationWaitsUntilCanPresentIsTrue() throws {
         let storage = InMemoryWhatsNewStorage()
+        storage.lastPresentedVersion = "1.1.0"
+
         let releases = [
             WhatsNewRelease(version: "1.2.0", title: "Current", topics: []),
         ]
@@ -22,7 +24,7 @@ struct WhatsNewPresentationPolicyTests {
         )
 
         #expect(blockedPresentation == nil)
-        #expect(storage.lastPresentedVersion == nil)
+        #expect(storage.lastPresentedVersion == "1.1.0")
 
         let presentation = try #require(WhatsNewPresentationPolicy.presentation(
             currentVersion: "1.2.0",
@@ -33,30 +35,14 @@ struct WhatsNewPresentationPolicyTests {
         ))
 
         #expect(presentation.releases.map(\.version) == ["1.2.0"])
-        #expect(storage.lastPresentedVersion == nil)
-    }
-
-    @Test("automatic presentation can present on the first evaluation when canPresent is true")
-    func automaticPresentationCanPresentOnFirstEvaluationWhenCanPresentIsTrue() throws {
-        let storage = InMemoryWhatsNewStorage()
-        let releases = [
-            WhatsNewRelease(version: "1", title: "Initial", topics: []),
-        ]
-
-        let presentation = try #require(WhatsNewPresentationPolicy.presentation(
-            currentVersion: "1",
-            releases: releases,
-            storage: storage,
-            trigger: .appLaunch
-        ))
-
-        #expect(presentation.releases.map(\.version) == ["1"])
-        #expect(storage.lastPresentedVersion == nil)
+        #expect(storage.lastPresentedVersion == "1.1.0")
     }
 
     @Test("automatic presentation does not present releases newer than the current app version")
     func automaticPresentationDoesNotPresentReleasesNewerThanCurrentAppVersion() {
         let storage = InMemoryWhatsNewStorage()
+        storage.lastPresentedVersion = "1.1.0"
+
         let releases = [
             WhatsNewRelease(version: "1.2.1", title: "Future", topics: []),
         ]
@@ -69,91 +55,27 @@ struct WhatsNewPresentationPolicyTests {
         )
 
         #expect(presentation == nil)
-        #expect(storage.lastPresentedVersion == nil)
+        #expect(storage.lastPresentedVersion == "1.1.0")
     }
 
-    @Test("automatic presentation presents current release when no release has been registered")
-    func automaticPresentationPresentsCurrentReleaseWhenNoReleaseHasBeenRegistered() throws {
+    @Test("automatic presentation presents only the pre-release that is not newer than the current version")
+    func automaticPresentationComparesPreReleases() throws {
         let storage = InMemoryWhatsNewStorage()
+        storage.lastPresentedVersion = "1.1.0"
+
         let releases = [
-            WhatsNewRelease(version: "1.2.0", title: "Current", topics: []),
+            WhatsNewRelease(version: "1.2.0-beta.1", title: "Beta", topics: []),
+            WhatsNewRelease(version: "1.2.0", title: "Release", topics: []),
         ]
 
         let presentation = try #require(WhatsNewPresentationPolicy.presentation(
-            currentVersion: "1.2.0",
+            currentVersion: "1.2.0-beta.1",
             releases: releases,
             storage: storage,
             trigger: .appLaunch
         ))
 
-        #expect(presentation.releases.map(\.version) == ["1.2.0"])
-        #expect(storage.lastPresentedVersion == nil)
-    }
-
-    @Test("new users can mark the current version as baseline without presenting current or older releases")
-    func newUsersCanMarkCurrentVersionAsBaseline() {
-        let storage = InMemoryWhatsNewStorage()
-        let releases = [
-            WhatsNewRelease(version: "1.2.0", title: "Previous", topics: []),
-            WhatsNewRelease(version: "1.2.1", title: "Current", topics: []),
-        ]
-
-        WhatsNewPresentationPolicy.markCurrentVersionAsBaseline(
-            currentVersion: "1.2.1",
-            storage: storage
-        )
-
-        let presentation = WhatsNewPresentationPolicy.presentation(
-            currentVersion: "1.2.1",
-            releases: releases,
-            storage: storage,
-            trigger: .appLaunch
-        )
-
-        #expect(presentation == nil)
-        #expect(storage.lastPresentedVersion == "1.2.1")
-    }
-
-    @Test("releases newer than a new user baseline are eligible on the next app version")
-    func releasesNewerThanBaselineAreEligible() throws {
-        let storage = InMemoryWhatsNewStorage()
-        let releases = [
-            WhatsNewRelease(version: "1.2.1", title: "Baseline", topics: []),
-            WhatsNewRelease(version: "1.2.2", title: "Next", topics: []),
-        ]
-
-        WhatsNewPresentationPolicy.markCurrentVersionAsBaseline(
-            currentVersion: "1.2.1",
-            storage: storage
-        )
-
-        let presentation = try #require(WhatsNewPresentationPolicy.presentation(
-            currentVersion: "1.2.2",
-            releases: releases,
-            storage: storage,
-            trigger: .appLaunch
-        ))
-
-        #expect(presentation.releases.map(\.version) == ["1.2.2"])
-        #expect(storage.lastPresentedVersion == "1.2.1")
-    }
-
-    @Test("existing users without a baseline can still see the current release")
-    func existingUsersWithoutBaselineCanStillSeeCurrentRelease() throws {
-        let storage = InMemoryWhatsNewStorage()
-        let releases = [
-            WhatsNewRelease(version: "1.2.1", title: "Current", topics: []),
-        ]
-
-        let presentation = try #require(WhatsNewPresentationPolicy.presentation(
-            currentVersion: "1.2.1",
-            releases: releases,
-            storage: storage,
-            trigger: .appLaunch
-        ))
-
-        #expect(presentation.releases.map(\.version) == ["1.2.1"])
-        #expect(storage.lastPresentedVersion == nil)
+        #expect(presentation.releases.map(\.version) == ["1.2.0-beta.1"])
     }
 
     @Test("manual trigger presents releases even before automatic baseline exists")
@@ -178,6 +100,7 @@ struct WhatsNewPresentationPolicyTests {
     func manualTriggerPresentsEveryReleaseAfterCurrentReleasesWereRegistered() throws {
         let storage = InMemoryWhatsNewStorage()
         storage.lastPresentedVersion = "2"
+
         let releases = [
             WhatsNewRelease(version: "1", title: "One", topics: []),
             WhatsNewRelease(version: "2", title: "Two", topics: []),
@@ -192,6 +115,7 @@ struct WhatsNewPresentationPolicyTests {
         ))
 
         #expect(presentation.releases.map(\.version) == ["1", "2", "3"])
+        #expect(storage.lastPresentedVersion == "2")
     }
 
     @Test("manual trigger presents releases newer than the current app version")
@@ -264,6 +188,7 @@ struct WhatsNewPresentationPolicyTests {
     func completedPresentationsRegisterLatestDisplayedVersion() throws {
         let storage = InMemoryWhatsNewStorage()
         storage.lastPresentedVersion = "2"
+
         let presentation = WhatsNewPresentation(releases: [
             WhatsNewRelease(version: "3", title: "Three", topics: []),
             WhatsNewRelease(version: "4", title: "Four", topics: []),
@@ -322,6 +247,7 @@ struct WhatsNewPresentationPolicyTests {
     func completedSemanticVersionPresentationsRegisterHighestNumericVersion() {
         let storage = InMemoryWhatsNewStorage()
         storage.lastPresentedVersion = "1.0.0"
+
         let presentation = WhatsNewPresentation(releases: [
             WhatsNewRelease(version: "2.5.1", title: "Two five one", topics: []),
             WhatsNewRelease(version: "1.10.0", title: "One ten zero", topics: []),
@@ -337,6 +263,7 @@ struct WhatsNewPresentationPolicyTests {
     func completedAutomaticPresentationsContinueRegisteringLatestDisplayedVersion() throws {
         let storage = InMemoryWhatsNewStorage()
         storage.lastPresentedVersion = "1.2.1"
+
         let releases = [
             WhatsNewRelease(version: "1.2.2", title: "Next", topics: []),
         ]

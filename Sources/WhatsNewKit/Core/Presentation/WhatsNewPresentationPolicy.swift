@@ -11,72 +11,108 @@ enum WhatsNewPresentationPolicy {
         canPresent: Bool = true,
         trigger: WhatsNewPresentationTrigger = .appLaunch
     ) -> WhatsNewPresentation? {
-        if trigger == .manual {
-            let visibleReleases = releases.sorted {
-                SemanticVersion($0.version) < SemanticVersion($1.version)
-            }
+        switch trigger {
+        case .manual:
+            return presentation(for: sortedByVersion(releases))
 
-            guard visibleReleases.isEmpty == false else {
-                return nil
-            }
-
-            return WhatsNewPresentation(releases: visibleReleases)
+        case .appLaunch:
+            return automaticPresentation(
+                currentVersion: currentVersion,
+                releases: releases,
+                storage: storage,
+                canPresent: canPresent
+            )
         }
-
-        guard canPresent else {
-            return nil
-        }
-
-        let visibleReleases = pendingReleases(
-            currentVersion: currentVersion,
-            releases: releases,
-            lastPresentedVersion: storage.lastPresentedVersion
-        )
-
-        guard visibleReleases.isEmpty == false else {
-            return nil
-        }
-
-        return WhatsNewPresentation(releases: visibleReleases)
     }
 
     static func register(
         _ presentation: WhatsNewPresentation,
         storage: WhatsNewStorage
     ) {
-        let versions = presentation.releases.map(\.version)
+        let latestVersion = presentation.releases
+            .compactMap { SemanticVersion($0.version) }
+            .max()
 
-        guard let latestVersion = versions.max(by: { SemanticVersion($0) < SemanticVersion($1) }) else {
+        guard let latestVersion else {
             return
         }
 
-        storage.lastPresentedVersion = latestVersion
+        advanceLastPresentedVersion(to: latestVersion, storage: storage)
     }
 
     static func markCurrentVersionAsBaseline(
         currentVersion: String,
         storage: WhatsNewStorage
     ) {
-        storage.lastPresentedVersion = currentVersion
+        guard let current = SemanticVersion(currentVersion) else {
+            return
+        }
+
+        advanceLastPresentedVersion(to: current, storage: storage)
     }
 
     // MARK: - Private Methods
 
-    private static func pendingReleases(
+    /// A missing or unreadable stored version means the app was just installed: the
+    /// current version becomes the baseline and nothing is presented, even when
+    /// `canPresent` is `false`, so the next update is compared against it.
+    private static func automaticPresentation(
         currentVersion: String,
         releases: [WhatsNewRelease],
-        lastPresentedVersion: String?
-    ) -> [WhatsNewRelease] {
-        let current = SemanticVersion(currentVersion)
-        let lastPresented = lastPresentedVersion.map(SemanticVersion.init)
+        storage: WhatsNewStorage,
+        canPresent: Bool
+    ) -> WhatsNewPresentation? {
+        guard let current = SemanticVersion(currentVersion) else {
+            return nil
+        }
 
-        return releases
-            .filter { release in
-                let releaseVersion = SemanticVersion(release.version)
-                let isAfterLastPresented = lastPresented.map { $0 < releaseVersion } ?? true
+        guard let lastPresented = storage.lastPresentedVersion.flatMap(SemanticVersion.init) else {
+            storage.lastPresentedVersion = current.rawValue
+            return nil
+        }
 
-                return isAfterLastPresented && releaseVersion <= current
+        guard canPresent else {
+            return nil
+        }
+
+        let pendingReleases = releases.filter { release in
+            guard let version = SemanticVersion(release.version) else {
+                return false
             }
-            .sorted { SemanticVersion($0.version) < SemanticVersion($1.version) }
+
+            return lastPresented < version && version <= current
+        }
+
+        return presentation(for: sortedByVersion(pendingReleases))
+    }
+
+    private static func advanceLastPresentedVersion(
+        to version: SemanticVersion,
+        storage: WhatsNewStorage
+    ) {
+        let lastPresented = storage.lastPresentedVersion.flatMap(SemanticVersion.init)
+
+        if let lastPresented, version <= lastPresented {
+            return
+        }
+
+        storage.lastPresentedVersion = version.rawValue
+    }
+
+    private static func sortedByVersion(_ releases: [WhatsNewRelease]) -> [WhatsNewRelease] {
+        releases
+            .compactMap { release in
+                SemanticVersion(release.version).map { (version: $0, release: release) }
+            }
+            .sorted { $0.version < $1.version }
+            .map(\.release)
+    }
+
+    private static func presentation(for releases: [WhatsNewRelease]) -> WhatsNewPresentation? {
+        guard releases.isEmpty == false else {
+            return nil
+        }
+
+        return WhatsNewPresentation(releases: releases)
     }
 }

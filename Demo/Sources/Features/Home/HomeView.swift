@@ -40,12 +40,7 @@ struct HomeView: View {
             .whatsNewSheet(
                 releases: viewModel.releases,
                 canPresent: viewModel.canPresentWhatsNew,
-                currentVersion: viewModel.currentVersion,
-                onEvent: viewModel.track
-            )
-            .whatsNewSheet(
                 isTriggered: $viewModel.isWhatsNewTriggered,
-                releases: viewModel.releases,
                 currentVersion: viewModel.currentVersion,
                 onEvent: viewModel.track
             )

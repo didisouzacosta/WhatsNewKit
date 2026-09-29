@@ -85,10 +85,11 @@ Demo/
 └── Resources/          AppIcon.icon
 ```
 
-- Entrada e composição: os modificadores em
-  `Features/SheetPresentation/View+WhatsNewSheet.swift`. Cada modificador cria
-  seu `WhatsNewPresentationViewModel` com `UserDefaultsWhatsNewStorage` padrão;
-  testes injetam `WhatsNewStorage`. No Demo, `WhatsNewKitDemoApp` compõe o
+- Entrada e composição: os overloads públicos em
+  `Features/SheetPresentation/View+WhatsNewSheet.swift` aplicam o único
+  `WhatsNewPresentationModifier`, que cria seu `WhatsNewPresentationViewModel`
+  com `UserDefaultsWhatsNewStorage(defaults:namespace:)`; testes injetam
+  `WhatsNewStorage`. No Demo, `WhatsNewKitDemoApp` compõe o
   `HomeViewModel`.
 - Domínio: `WhatsNewPresentationPolicy` (funções puras sobre releases, versão e
   storage) e `SemanticVersion`.
@@ -158,7 +159,7 @@ Demo/
 - Ferramentas: `brew install swiftlint swiftformat` ou `scripts/install-swift-tools.sh` (versões fixas, usado no CI/Xcode Cloud).
 - Fase de build do Xcode (target sem sandbox de scripts): `scripts/lint-swift.sh --format-only`.
 - Cobertura neste projeto: `Sources/`, `Tests/`, `Package.swift` e
-  `Demo/Sources/` (52 arquivos em 2026-09-29). O Demo só é coberto porque seu
+  `Demo/Sources/` (53 arquivos em 2026-09-29). O Demo só é coberto porque seu
   código fica em `Demo/Sources`; não mova código Swift para fora dessa pasta.
 - O Demo não tem fase de build de lint (`ENABLE_USER_SCRIPT_SANDBOXING = YES`);
   o gate roda pela linha de comando e pelo workflow `.github/workflows/swift-lint.yml`.
@@ -194,19 +195,22 @@ Demo/
 Registre comandos e resultados reais. Separe compilação e Simulator de
 validação em dispositivo físico e de serviços externos.
 
-- Testes unitários: `swift test` — 39 testes em 9 suítes passando em
+- Testes unitários: `swift test` — 58 testes em 11 suítes passando em
   2026-09-29 (macOS, Xcode 27.0, Swift 6.4).
 - Testes de integração: não há; `WhatsNewPresentationStatePublicAPITests` usa
   uma suíte `UserDefaults` descartável.
 - Build: `swift build` (macOS, sem avisos) e
   `xcodebuild -project Demo/WhatsNewKitDemo.xcodeproj -scheme WhatsNewKitDemo -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build`
   (sem erros nem avisos; compila o pacote para iOS).
-- Simulator: não executado interativamente.
+- Simulator: iPhone 16 em 2026-09-29 — instalação nova, apresentação
+  automática após atualização, dismiss por gesto e sheet manual (detalhes no
+  brief). Para simular a versão gravada, escreva via
+  `xcrun simctl spawn <udid> defaults write <container>/Library/Preferences/<bundle-id> <chave> <versão>`;
+  editar o plist direto não passa pelo cache do `cfprefsd`.
 - Dispositivo físico: não validado.
 - Serviços live: não se aplica; mídia remota do Demo não foi validada.
-- Validações ainda não executadas: fluxos no Simulator (automático, manual,
-  dismiss por gesto, vídeo), macOS em execução, VoiceOver, Dynamic Type e
-  Liquid Glass em iOS 26+ versus fallback.
+- Validações ainda não executadas: vídeo e mídia remota no Simulator, macOS em
+  execução, VoiceOver, Dynamic Type e Liquid Glass em iOS 26+ versus fallback.
 
 ## Entrega
 
@@ -222,5 +226,5 @@ validação em dispositivo físico e de serviços externos.
   compartilhado e deve ser preservado.
 - Estado de commit esperado: commits separados para configuração da base,
   reorganização/formatação mecânica e mudanças de comportamento.
-- Riscos conhecidos: ver Pendências no brief (dismiss por gesto, registro de
-  versões futuras no fluxo manual, criação de `AVPlayerItem` por `init`).
+- Riscos conhecidos: ver Pendências no brief (criação de `AVPlayerItem` por
+  `init`).

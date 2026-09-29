@@ -7,11 +7,13 @@ final class WhatsNewPresentationViewModel {
 
     // MARK: - Public Properties
 
-    var activePresentation: WhatsNewPresentation?
+    private(set) var activePresentation: WhatsNewPresentation?
 
     // MARK: - Private Properties
 
     @ObservationIgnored private let storage: WhatsNewStorage
+
+    @ObservationIgnored private var activeTrigger: WhatsNewPresentationTrigger?
 
     // MARK: - Initializer
 
@@ -30,11 +32,14 @@ final class WhatsNewPresentationViewModel {
             return
         }
 
-        activePresentation = WhatsNewPresentationPolicy.presentation(
-            currentVersion: currentVersion,
-            releases: releases,
-            storage: storage,
-            canPresent: canPresent,
+        present(
+            WhatsNewPresentationPolicy.presentation(
+                currentVersion: currentVersion,
+                releases: releases,
+                storage: storage,
+                canPresent: canPresent,
+                trigger: .appLaunch
+            ),
             trigger: .appLaunch
         )
     }
@@ -43,16 +48,48 @@ final class WhatsNewPresentationViewModel {
         releases: [WhatsNewRelease],
         currentVersion: String
     ) {
-        activePresentation = WhatsNewPresentationPolicy.presentation(
-            currentVersion: currentVersion,
-            releases: releases,
-            storage: storage,
+        guard activePresentation == nil else {
+            return
+        }
+
+        present(
+            WhatsNewPresentationPolicy.presentation(
+                currentVersion: currentVersion,
+                releases: releases,
+                storage: storage,
+                trigger: .manual
+            ),
             trigger: .manual
         )
     }
 
-    func finish(_ presentation: WhatsNewPresentation) {
-        WhatsNewPresentationPolicy.register(presentation, storage: storage)
-        activePresentation = nil
+    /// Ends the active presentation however it was closed (button or interactive
+    /// dismissal). Only automatic presentations are registered as seen; a manual
+    /// presentation leaves the stored version untouched.
+    func finish() {
+        guard let activePresentation else {
+            return
+        }
+
+        if activeTrigger == .appLaunch {
+            WhatsNewPresentationPolicy.register(activePresentation, storage: storage)
+        }
+
+        self.activePresentation = nil
+        activeTrigger = nil
+    }
+
+    // MARK: - Private Methods
+
+    private func present(
+        _ presentation: WhatsNewPresentation?,
+        trigger: WhatsNewPresentationTrigger
+    ) {
+        guard let presentation else {
+            return
+        }
+
+        activeTrigger = trigger
+        activePresentation = presentation
     }
 }

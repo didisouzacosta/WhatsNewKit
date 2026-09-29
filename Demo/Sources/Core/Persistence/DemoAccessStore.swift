@@ -1,5 +1,4 @@
 import Foundation
-import WhatsNewKit
 
 struct DemoAccessStore {
 
@@ -28,7 +27,6 @@ struct DemoAccessStore {
             return
         }
 
-        WhatsNewPresentationState.markCurrentVersionAsSeen(defaults: defaults)
         defaults.set(true, forKey: Self.hasAccessedAppKey)
     }
 }

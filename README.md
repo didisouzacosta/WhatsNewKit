@@ -18,7 +18,7 @@
 
 `WhatsNewKit` helps SwiftUI apps present polished "What's New" sheets after an update. Declare the releases your app knows about, attach a view modifier, and the package decides which versions should be shown.
 
-Automatic presentation is controlled by your app through `canPresent`. When that value is `true`, users see every release newer than the last presented version and up to the current app version. When it is `false`, nothing is shown or marked as seen, so the pending release remains eligible for a later evaluation.
+Automatic presentation is controlled by your app through `canPresent`. A new install never shows the sheet: the installed version is recorded and only later updates are presented. When `canPresent` is `true`, users see every release newer than the last presented version and up to the current app version. When it is `false`, nothing is shown or marked as seen, so the pending release remains eligible for a later evaluation.
 
 <p align="center">
   <img alt="WhatsNewKit overview release page" src="Docs/Images/whats-new-overview.png" width="260">
@@ -34,7 +34,7 @@ Automatic presentation is controlled by your app through `canPresent`. When that
 - Image and video media support per release.
 - Topic rows with optional SF Symbols or bundled image assets.
 - Internal `UserDefaults` storage scoped to the host app bundle.
-- Semantic version ordering for values such as `1.1.0`, `2.0.0`, and `2.5.1`.
+- Semantic version ordering for values such as `1.1.0`, `2.0.0`, and `2.5.1`, including pre-release suffixes such as `2.0.0-beta.1`.
 
 ## Installation
 
@@ -107,25 +107,33 @@ struct HomeView: View {
 
 If the last presented version was `2.0.0` and the current app version is `3.0.0`, the sheet presents releases after `2.0.0` through `3.0.0`, ordered by version. If `canPresent` is `false`, the sheet is not presented and `2.0.0` remains the last presented version.
 
+The modifier evaluates again when the host view appears and whenever `canPresent`, `releases`, or `currentVersion` change, so releases loaded asynchronously are picked up as soon as they arrive.
+
 ### Presentation Rules
 
 Automatic presentation uses three inputs:
 
 - `canPresent`, provided by the app that integrates `WhatsNewKit`.
 - `currentVersion`, read from `CFBundleShortVersionString` by default or passed explicitly.
-- `lastPresentedVersion`, stored internally after the user finishes a What's New presentation.
+- `lastPresentedVersion`, stored internally on the first evaluation and after the user closes an automatic What's New presentation.
 
-The automatic sheet is shown only when all of these conditions are true:
+On the first evaluation after install there is no stored version yet. `WhatsNewKit` records `currentVersion` as the last presented version and shows nothing, even when `canPresent` is `false`. Existing users who update to the first app version that adopts `WhatsNewKit` are treated the same way, because there is no earlier state to tell them apart from a new install.
+
+After that, the automatic sheet is shown only when all of these conditions are true:
 
 - `canPresent` is `true`.
 - At least one declared release has a version less than or equal to `currentVersion`.
-- At least one eligible release is newer than `lastPresentedVersion`, or no version has been presented yet.
+- At least one of those releases is newer than `lastPresentedVersion`.
 
 These cases do not show the sheet:
 
+- It is the first evaluation after install.
 - `canPresent` is `false`, even when there is a new eligible version.
 - A release version is greater than `currentVersion`.
 - The eligible release version was already presented for that user.
+- The release version or `currentVersion` has no numeric component (for example `"next"`); such values are ignored.
+
+Closing the sheet in any way, with Done, the close button, or the swipe-down gesture, records the latest presented version so it is not shown again. The stored version never moves backwards.
 
 When `canPresent` is `false`, `WhatsNewKit` does not mark anything as presented. If `canPresent` later changes to `true`, the framework evaluates the same pending releases again and presents any eligible version that has not already been shown.
 
@@ -141,7 +149,7 @@ func onboardingDidFinish() {
 }
 ```
 
-Only call this when your app intentionally wants to suppress the current version. If you only need to delay presentation, keep `canPresent` as `false` until your app is ready.
+Only call this when your app intentionally wants to suppress the current version. If you only need to delay presentation, keep `canPresent` as `false` until your app is ready. You do not need to call it on first launch: new installs are handled automatically. Calling it with a version lower than the stored one has no effect.
 
 ### Manual Presentation
 
@@ -170,7 +178,17 @@ struct SettingsView: View {
 }
 ```
 
-Manual presentation is forced. It ignores first-launch state, the stored last-presented version, and the current app version, then shows every declared release ordered by version. This makes it suitable for settings screens, debug tools, previews, and development workflows.
+Manual presentation is forced. It ignores first-launch state, the stored last-presented version, and the current app version, then shows every declared release ordered by version. Closing a manual presentation does not record anything, so it never hides a release from a later automatic presentation. This makes it suitable for settings screens, debug tools, previews, and development workflows.
+
+When the same screen needs both automatic and manual presentation, use the combined modifier. It hosts a single sheet, so the two sources never try to present at the same time; a trigger received while a sheet is already visible is ignored.
+
+```swift
+.whatsNewSheet(
+    releases: releases,
+    canPresent: canPresentWhatsNew,
+    isTriggered: $showWhatsNew
+)
+```
 
 ## Release Model
 
@@ -218,6 +236,23 @@ let release = WhatsNewRelease(
 ## Version Control
 
 `WhatsNewKit` stores presentation state internally with `UserDefaults`. Apps do not need to provide their own storage implementation.
+
+By default the state lives in `UserDefaults.standard` under a key prefixed with the app bundle identifier. To store it elsewhere, such as an App Group suite, pass the same `defaults` and `namespace` to the automatic modifier and to `WhatsNewPresentationState`:
+
+```swift
+let defaults = UserDefaults(suiteName: "group.com.example.app")!
+
+.whatsNewSheet(
+    releases: releases,
+    defaults: defaults,
+    namespace: "com.example.app"
+)
+
+WhatsNewPresentationState.markCurrentVersionAsSeen(
+    defaults: defaults,
+    namespace: "com.example.app"
+)
+```
 
 For previews, tests, or custom rollout logic, pass an explicit `currentVersion`:
 

@@ -39,4 +39,20 @@ struct WhatsNewPresentationTests {
         #expect(presentation.steps.map(\.page.title) == ["Cover", "Teleprompter"])
         #expect(presentation.showsStepIndicator)
     }
+
+    @Test("steps have unique identifiers and sequential indexes even with repeated page titles")
+    func stepsHaveUniqueIdentifiersAndSequentialIndexes() {
+        let presentation = WhatsNewPresentation(releases: [
+            WhatsNewRelease(version: "1.0.0", pages: [
+                WhatsNewPage(title: "Highlights", topics: []),
+                WhatsNewPage(title: "Highlights", topics: []),
+            ]),
+            WhatsNewRelease(version: "1.0.0", title: "Highlights", topics: []),
+        ])
+
+        let steps = presentation.steps
+
+        #expect(Set(steps.map(\.id)).count == 3)
+        #expect(steps.map(\.index) == [0, 1, 2])
+    }
 }

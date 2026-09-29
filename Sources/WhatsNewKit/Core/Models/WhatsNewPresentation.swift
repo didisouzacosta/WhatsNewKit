@@ -23,14 +23,20 @@ public struct WhatsNewPresentation: Identifiable, Equatable, Sendable {
     }
 
     var steps: [WhatsNewPresentationStep] {
-        releases.flatMap { release in
-            release.pages.map { page in
+        releases
+            .flatMap { release in
+                release.pages.map { page in
+                    (release: release, page: page)
+                }
+            }
+            .enumerated()
+            .map { index, step in
                 WhatsNewPresentationStep(
-                    release: release,
-                    page: page
+                    index: index,
+                    release: step.release,
+                    page: step.page
                 )
             }
-        }
     }
 
     // MARK: - Initializer

@@ -12,13 +12,13 @@ struct WhatsNewSheetPager: View {
 
     var body: some View {
         TabView(selection: $selectedIndex) {
-            ForEach(Array(steps.enumerated()), id: \.element.id) { index, step in
+            ForEach(steps) { step in
                 WhatsNewReleasePage(
                     release: step.release,
                     page: step.page,
-                    isActive: selectedIndex == index
+                    isActive: selectedIndex == step.index
                 )
-                .tag(index)
+                .tag(step.index)
             }
         }
         #if os(iOS)

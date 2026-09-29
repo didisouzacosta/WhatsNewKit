@@ -24,4 +24,28 @@ struct WhatsNewPresentationStatePublicAPITests {
 
         #expect(defaults.string(forKey: "\(namespace).WhatsNewKit.lastPresentedVersion") == "1.2.1")
     }
+
+    @Test("public API never moves the seen version backwards")
+    func publicAPINeverMovesSeenVersionBackwards() throws {
+        let namespace = "WhatsNewKitTests.PublicAPI.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: namespace))
+
+        defer {
+            defaults.removePersistentDomain(forName: namespace)
+        }
+
+        WhatsNewPresentationState.markCurrentVersionAsSeen(
+            currentVersion: "2.0.0",
+            defaults: defaults,
+            namespace: namespace
+        )
+
+        WhatsNewPresentationState.markCurrentVersionAsSeen(
+            currentVersion: "1.0.0",
+            defaults: defaults,
+            namespace: namespace
+        )
+
+        #expect(defaults.string(forKey: "\(namespace).WhatsNewKit.lastPresentedVersion") == "2.0.0")
+    }
 }
