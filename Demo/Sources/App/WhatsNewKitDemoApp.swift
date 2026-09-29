@@ -5,6 +5,7 @@ struct WhatsNewKitDemoApp: App {
     var body: some Scene {
         WindowGroup {
             HomeView(viewModel: HomeViewModel())
+                .tint(DemoTheme.brandBlue)
         }
     }
 }

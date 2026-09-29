@@ -9,6 +9,7 @@ final class HomeViewModel {
     // MARK: - Public Properties
 
     let releases: [WhatsNewRelease]
+    let releaseSummaries: [ReleaseSummary]
     let currentVersion: String
 
     var canPresentWhatsNew: Bool
@@ -26,6 +27,9 @@ final class HomeViewModel {
         accessStore: DemoAccessStore = DemoAccessStore()
     ) {
         self.releases = releases
+        self.releaseSummaries = releases
+            .map { ReleaseSummary(release: $0, currentVersion: currentVersion) }
+            .sorted { $0.version.compare($1.version, options: .numeric) == .orderedDescending }
         self.currentVersion = currentVersion
         self.accessStore = accessStore
         self.canPresentWhatsNew = accessStore.isReturningUser

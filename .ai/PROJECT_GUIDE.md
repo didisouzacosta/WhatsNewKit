@@ -80,8 +80,9 @@ Tests/WhatsNewKitTests/
 └── Support/            dublês compartilhados (InMemoryWhatsNewStorage)
 Demo/
 ├── Sources/App/        WhatsNewKitDemoApp (composição do HomeViewModel)
-├── Sources/Core/       Data (DemoReleaseCatalog), Persistence (DemoAccessStore)
-├── Sources/Features/   Home (HomeView, HomeViewModel, Components)
+├── Sources/Core/       Data (DemoReleaseCatalog), Design (DemoTheme, CompactLabelStyle),
+│                       Persistence (DemoAccessStore)
+├── Sources/Features/   Home (HomeView, HomeViewModel, Components, Models/ReleaseSummary)
 └── Resources/          AppIcon.icon
 ```
 
@@ -159,7 +160,7 @@ Demo/
 - Ferramentas: `brew install swiftlint swiftformat` ou `scripts/install-swift-tools.sh` (versões fixas, usado no CI/Xcode Cloud).
 - Fase de build do Xcode (target sem sandbox de scripts): `scripts/lint-swift.sh --format-only`.
 - Cobertura neste projeto: `Sources/`, `Tests/`, `Package.swift` e
-  `Demo/Sources/` (53 arquivos em 2026-09-29). O Demo só é coberto porque seu
+  `Demo/Sources/` (61 arquivos em 2026-09-29). O Demo só é coberto porque seu
   código fica em `Demo/Sources`; não mova código Swift para fora dessa pasta.
 - O Demo não tem fase de build de lint (`ENABLE_USER_SCRIPT_SANDBOXING = YES`);
   o gate roda pela linha de comando e pelo workflow `.github/workflows/swift-lint.yml`.

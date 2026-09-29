@@ -18,22 +18,20 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Demo status") {
-                    LabeledContent("Current version", value: viewModel.currentVersion)
-                    Toggle("Allow automatic What's New", isOn: $viewModel.canPresentWhatsNew)
+                Section {
+                    HomeHeader(currentVersion: viewModel.currentVersion)
                 }
+                .listRowBackground(Color.clear)
+                .listSectionSpacing(.compact)
 
-                Section("Actions") {
-                    Button("Open What's New manually", action: viewModel.openWhatsNewManually)
-                }
+                presentationSection
 
-                Section("Configured releases") {
-                    ForEach(viewModel.releases) { release in
-                        ReleaseSummaryRow(release: release)
-                    }
-                }
+                previewSection
+
+                releasesSection
             }
-            .navigationTitle("WhatsNewKit Demo")
+            .navigationTitle("Demo")
+            .navigationBarTitleDisplayMode(.inline)
             .task {
                 viewModel.registerInitialAccessIfNeeded()
             }
@@ -44,6 +42,52 @@ struct HomeView: View {
                 currentVersion: viewModel.currentVersion,
                 onEvent: viewModel.track
             )
+        }
+    }
+
+    // MARK: - Private Views
+
+    private var presentationSection: some View {
+        Section {
+            Toggle(isOn: $viewModel.canPresentWhatsNew) {
+                Label("Automatic presentation", systemImage: "wand.and.sparkles")
+            }
+        } header: {
+            Text("Presentation")
+        } footer: {
+            Text("""
+            When on, releases newer than the last one seen appear automatically. \
+            A new install never shows the sheet.
+            """)
+        }
+    }
+
+    private var previewSection: some View {
+        Section {
+            Button(action: viewModel.openWhatsNewManually) {
+                Label("Preview all releases", systemImage: "play.rectangle.on.rectangle.fill")
+                    .labelStyle(.titleAndIcon)
+                    .font(.body.weight(.semibold))
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+        } footer: {
+            Text("Opens every configured release, including upcoming ones, without marking anything as seen.")
+        }
+    }
+
+    private var releasesSection: some View {
+        Section {
+            ForEach(viewModel.releaseSummaries) { summary in
+                ReleaseSummaryRow(summary: summary)
+            }
+        } header: {
+            Text("Configured releases")
+        } footer: {
+            Text("Declared in DemoReleaseCatalog, newest first.")
         }
     }
 }
